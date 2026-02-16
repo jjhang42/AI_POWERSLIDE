@@ -145,7 +145,11 @@ export function SlideCanvas({ children, aspectRatio, isFullscreen = false }: Sli
         }}
       >
         {/* Actual Slide Content */}
-        <div ref={slideContentRef} className="w-full h-full overflow-hidden">
+        <div
+          ref={slideContentRef}
+          className="w-full h-full overflow-hidden"
+          data-slide-content="true"
+        >
           {children}
         </div>
 

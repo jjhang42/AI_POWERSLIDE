@@ -8,9 +8,9 @@ import type {
   ExportOptions,
   ExportResult,
   ExportProgress,
-  ExportStage,
   RenderedSlide,
 } from "../types";
+import { ExportStage } from "../types";
 
 export abstract class BaseExporter {
   protected renderer: SlideRenderer;

@@ -35,15 +35,19 @@ export function SimpleSettingsSidebar({
 
   const getSlideElements = (): HTMLElement[] => {
     // SlideCanvas 내부의 슬라이드 컨텐츠 찾기
-    const slideContent = document.querySelector(".w-full.h-full.overflow-hidden");
-    if (slideContent && slideContent.firstElementChild) {
-      return [slideContent.firstElementChild as HTMLElement];
+    const slideContent = document.querySelector("[data-slide-content='true']");
+
+    if (slideContent) {
+      // 슬라이드 컨텐츠 자체를 반환 (자식이 아니라 컨테이너 전체)
+      return [slideContent as HTMLElement];
     }
+
     return [];
   };
 
   const handleExport = async (format: "jpg" | "pdf" | "pptx") => {
     const slides = getSlideElements();
+
     if (slides.length === 0) {
       alert("No slides found to export.");
       return;

@@ -99,14 +99,17 @@ export function useHistory<T>(
 
   const set = useCallback(
     (newState: T | ((prev: T) => T)) => {
-      const nextState =
-        typeof newState === "function"
-          ? (newState as (prev: T) => T)(state)
-          : newState;
-
-      dispatch({ type: "SET", payload: nextState });
+      if (typeof newState === "function") {
+        // For function updates, we need to pass a function to the reducer
+        // Since reducers can't handle async or function payloads directly,
+        // we get the current state and compute the new state here
+        const nextState = (newState as (prev: T) => T)(history[index]);
+        dispatch({ type: "SET", payload: nextState });
+      } else {
+        dispatch({ type: "SET", payload: newState });
+      }
     },
-    [state]
+    [history, index]
   );
 
   const undo = useCallback(() => {

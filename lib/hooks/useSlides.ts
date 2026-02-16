@@ -2,95 +2,63 @@
 
 import { useState, useEffect } from "react";
 import { SlideWithProps, TemplateProps } from "@/lib/types/slides";
-import { TemplateType } from "@/components/TemplatesSidebar";
+import { TEMPLATE_REGISTRY, TemplateType } from "@/components/templates";
+import { useHistory } from "./useHistory";
 
 const STORAGE_KEY = "presentation-slides";
 
-// DEFAULT_PROPS를 여기로 이동
+// DEFAULT_PROPS를 registry에서 가져옴
 const getDefaultProps = (type: TemplateType): TemplateProps => {
-  const defaultProps: Record<TemplateType, TemplateProps> = {
-    TitleSlide: {
-      title: "Your Presentation Title",
-      subtitle: "Subtitle goes here",
-      author: "Your Name",
-      date: new Date().toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric"
-      }),
-    },
-    SectionTitle: {
-      section: "Section 1",
-      title: "Section Title",
-      description: "Brief description of this section",
-    },
-    ContentSlide: {
-      title: "Content Title",
-      content: "Your content goes here. You can write anything you want to present.",
-      align: "left" as const,
-    },
-    TwoColumn: {
-      title: "Two Column Layout",
-      left: "Left content goes here",
-      right: "Right content goes here",
-      split: "50-50" as const,
-    },
-    BulletPoints: {
-      title: "Key Points",
-      points: [
-        "First important point",
-        "Second important point",
-        "Third important point",
-        "Fourth important point",
-      ],
-      icon: "check" as const,
-    },
-    QuoteSlide: {
-      quote: "Insert an inspiring quote here that resonates with your message.",
-      author: "Author Name",
-      title: "Title or Position",
-    },
-    ImageWithCaption: {
-      title: "Image Title",
-      imageSrc: "/placeholder.jpg",
-      imageAlt: "Image description",
-      caption: "Image caption goes here",
-      layout: "contained" as const,
-    },
-    ThankYou: {
-      message: "Thank You!",
-      cta: "Let's connect and discuss further",
-      contact: {
-        email: "hello@example.com",
-        website: "www.example.com",
-      },
-    },
-  };
+  return TEMPLATE_REGISTRY[type]?.defaultProps;
+};
 
-  return defaultProps[type];
+// Get initial slides from localStorage
+const getInitialSlides = (): SlideWithProps[] => {
+  if (typeof window === "undefined") return [];
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return [];
+    return JSON.parse(saved);
+  } catch (e) {
+    console.error("Failed to load initial slides:", e);
+    return [];
+  }
 };
 
 export function useSlides() {
-  const [slides, setSlides] = useState<SlideWithProps[]>([]);
+  const history = useHistory<SlideWithProps[]>(getInitialSlides());
+  const slides = history.state;
   const [lastSaved, setLastSaved] = useState<Date | undefined>(undefined);
   const [isSaving, setIsSaving] = useState(false);
+  const [lastActionDescription, setLastActionDescription] = useState<string>("");
+  const [isLoaded, setIsLoaded] = useState(true); // Already loaded from getInitialSlides
 
-  // localStorage에서 로드
+  // Listen for storage events (from aiHelpers or other tabs)
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setSlides(parsed);
-      } catch (e) {
-        console.error("Failed to load slides:", e);
+    if (typeof window === "undefined" || !isLoaded) return;
+
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          history.set(parsed);
+        } catch (e) {
+          console.error("Failed to sync slides from storage:", e);
+        }
+      } else {
+        // localStorage was cleared
+        history.set([]);
       }
-    }
-  }, []);
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, [isLoaded, history.set]);
 
   // 변경 시 저장 (debounced)
   useEffect(() => {
-    if (slides.length > 0) {
+    if (isLoaded && slides.length > 0) {
       setIsSaving(true);
 
       const timer = setTimeout(() => {
@@ -106,7 +74,7 @@ export function useSlides() {
 
       return () => clearTimeout(timer);
     }
-  }, [slides]);
+  }, [slides, isLoaded]);
 
   // 슬라이드 추가
   const addSlide = (type: TemplateType, name: string) => {
@@ -116,7 +84,8 @@ export function useSlides() {
       name,
       props: getDefaultProps(type),
     };
-    setSlides([...slides, newSlide]);
+    setLastActionDescription(`Added ${name}`);
+    history.set([...slides, newSlide]);
     return slides.length; // 새 슬라이드 인덱스 반환
   };
 
@@ -127,12 +96,15 @@ export function useSlides() {
       ...updated[index],
       props: { ...updated[index].props, ...newProps } as TemplateProps,
     };
-    setSlides(updated);
+    setLastActionDescription(`Updated ${updated[index].name}`);
+    history.set(updated);
   };
 
   // 슬라이드 삭제
   const deleteSlide = (index: number) => {
-    setSlides(slides.filter((_, i) => i !== index));
+    const slideName = slides[index]?.name || "slide";
+    setLastActionDescription(`Deleted ${slideName}`);
+    history.set(slides.filter((_, i) => i !== index));
   };
 
   // 슬라이드 순서 변경
@@ -140,7 +112,8 @@ export function useSlides() {
     const result = Array.from(slides);
     const [removed] = result.splice(startIndex, 1);
     result.splice(endIndex, 0, removed);
-    setSlides(result);
+    setLastActionDescription(`Reordered ${removed.name}`);
+    history.set(result);
   };
 
   // 슬라이드 복제
@@ -153,7 +126,8 @@ export function useSlides() {
     };
     const newSlides = [...slides];
     newSlides.splice(index + 1, 0, newSlide);
-    setSlides(newSlides);
+    setLastActionDescription(`Duplicated ${slideToDuplicate.name}`);
+    history.set(newSlides);
     return index + 1; // Return new slide index
   };
 
@@ -166,5 +140,13 @@ export function useSlides() {
     duplicateSlide,
     lastSaved,
     isSaving,
+    lastActionDescription,
+    undo: history.undo,
+    redo: history.redo,
+    goToHistoryIndex: history.goToIndex,
+    canUndo: history.canUndo,
+    canRedo: history.canRedo,
+    historyStates: history.history,
+    currentHistoryIndex: history.currentIndex,
   };
 }

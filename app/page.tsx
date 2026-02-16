@@ -5,54 +5,60 @@ import { motion, AnimatePresence } from "framer-motion";
 import { SlideCanvas } from "@/components/SlideCanvas";
 import { SimpleSettingsSidebar } from "@/components/SimpleSettingsSidebar";
 import { AspectRatio } from "@/components/AspectRatioSelector";
-import { TemplatesSidebar, TemplateType } from "@/components/TemplatesSidebar";
 import {
-  TitleSlide,
-  SectionTitle,
-  ContentSlide,
-  TwoColumn,
-  BulletPoints,
-  QuoteSlide,
-  ImageWithCaption,
-  ThankYou,
+  TEMPLATE_REGISTRY,
+  TemplateType,
 } from "@/components/templates";
 import { useSlides } from "@/lib/hooks/useSlides";
-import { AutoSaveIndicator } from "@/components/AutoSaveIndicator";
 import { FloatingInspector } from "@/components/editor/FloatingInspector";
+import { EditorPanel } from "@/components/editor/EditorPanel";
 import { KeyboardShortcutsHelp } from "@/components/KeyboardShortcutsHelp";
 import { CommandPalette } from "@/components/CommandPalette";
-import { ZoomControls } from "@/components/ZoomControls";
 import { PresentMode } from "@/components/PresentMode";
 import { useKeyboardShortcuts } from "@/lib/hooks/useKeyboardShortcuts";
 import { SlideTransitions, TransitionType, transitionVariants } from "@/components/SlideTransitions";
 import { GridGuides } from "@/components/GridGuides";
+import { UndoRedoToast } from "@/components/UndoRedoToast";
+import { KeyboardIndicator } from "@/components/KeyboardIndicator";
+import { HistoryPanel } from "@/components/HistoryPanel";
+import { EditProvider } from "@/lib/contexts/EditContext";
+import { UnifiedToolbar } from "@/components/UnifiedToolbar";
+import { CompactNavigator } from "@/components/CompactNavigator";
+import { TemplatesSidebar } from "@/components/TemplatesSidebar";
 
 // AIHelpers 로드 (window.aiHelpers로 노출됨)
 import "@/lib/ai-helpers";
-
-const TEMPLATE_NAMES: Record<TemplateType, string> = {
-  TitleSlide: "Title Slide",
-  SectionTitle: "Section Title",
-  ContentSlide: "Content Slide",
-  TwoColumn: "Two Column",
-  BulletPoints: "Bullet Points",
-  QuoteSlide: "Quote",
-  ImageWithCaption: "Image with Caption",
-  ThankYou: "Thank You",
-};
 
 export default function Home() {
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>("16:9");
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isInspectorOpen, setIsInspectorOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isTemplatesOpen, setIsTemplatesOpen] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [isPresentMode, setIsPresentMode] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [transitionType, setTransitionType] = useState<TransitionType>("fade");
   const [slideDirection, setSlideDirection] = useState(1);
+  const [isPositioningEnabled, setIsPositioningEnabled] = useState(false);
+  const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
+  const [editingSlideIndex, setEditingSlideIndex] = useState<number | null>(null);
+  const [showGrid, setShowGrid] = useState(false);
+  const [showTransitionsModal, setShowTransitionsModal] = useState(false);
+
+  // Toast state
+  const [showToast, setShowToast] = useState(false);
+  const [toastAction, setToastAction] = useState<"undo" | "redo">("undo");
+  const [toastDescription, setToastDescription] = useState("");
+
+  // Keyboard indicator state
+  const [showKeyboardIndicator, setShowKeyboardIndicator] = useState(false);
+  const [keyboardKeys, setKeyboardKeys] = useState<string[]>([]);
+
+  // History panel state
+  const [showHistoryPanel, setShowHistoryPanel] = useState(false);
 
   // useSlides 훅 사용
   const {
@@ -64,11 +70,28 @@ export default function Home() {
     duplicateSlide,
     lastSaved,
     isSaving,
+    lastActionDescription,
+    undo,
+    redo,
+    goToHistoryIndex,
+    canUndo,
+    canRedo,
+    historyStates,
+    currentHistoryIndex,
   } = useSlides();
+
+  // Adjust currentSlideIndex when slides length changes
+  useEffect(() => {
+    if (slides.length === 0) {
+      setCurrentSlideIndex(0);
+    } else if (currentSlideIndex >= slides.length) {
+      setCurrentSlideIndex(slides.length - 1);
+    }
+  }, [slides.length, currentSlideIndex]);
 
   // Add new slide
   const handleAddSlide = (type: TemplateType) => {
-    const newIndex = addSlide(type, TEMPLATE_NAMES[type]);
+    const newIndex = addSlide(type, TEMPLATE_REGISTRY[type].name);
     setCurrentSlideIndex(newIndex); // Move to new slide
   };
 
@@ -117,6 +140,9 @@ export default function Home() {
     setZoom(1);
   };
 
+  const canZoomIn = zoom < ZOOM_LEVELS[ZOOM_LEVELS.length - 1];
+  const canZoomOut = zoom > ZOOM_LEVELS[0];
+
   // Present mode
   const handleStartPresent = () => {
     setIsPresentMode(true);
@@ -126,9 +152,57 @@ export default function Home() {
     setIsPresentMode(false);
   };
 
+  // Undo/Redo handlers with toast
+  const handleUndo = () => {
+    if (canUndo) {
+      // Show keyboard indicator
+      setKeyboardKeys(["⌘", "Z"]);
+      setShowKeyboardIndicator(true);
+      setTimeout(() => setShowKeyboardIndicator(false), 600);
+
+      undo();
+      setToastAction("undo");
+      setToastDescription(lastActionDescription || "Action undone");
+      setShowToast(true);
+    }
+  };
+
+  const handleRedo = () => {
+    if (canRedo) {
+      // Show keyboard indicator
+      setKeyboardKeys(["⌘", "⇧", "Z"]);
+      setShowKeyboardIndicator(true);
+      setTimeout(() => setShowKeyboardIndicator(false), 600);
+
+      redo();
+      setToastAction("redo");
+      setToastDescription(lastActionDescription || "Action redone");
+      setShowToast(true);
+    }
+  };
+
   // Keyboard shortcuts
   useKeyboardShortcuts(
     [
+      {
+        key: "z",
+        metaKey: true,
+        callback: handleUndo,
+        description: "Undo",
+      },
+      {
+        key: "z",
+        metaKey: true,
+        shiftKey: true,
+        callback: handleRedo,
+        description: "Redo",
+      },
+      {
+        key: "h",
+        metaKey: true,
+        callback: () => setShowHistoryPanel((prev) => !prev),
+        description: "History",
+      },
       {
         key: "i",
         metaKey: true,
@@ -221,6 +295,11 @@ export default function Home() {
         return;
       }
 
+      // Don't handle arrow keys if positioning mode is enabled
+      if (isPositioningEnabled && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+        return;
+      }
+
       switch (e.key) {
         case "ArrowRight":
         case "ArrowDown":
@@ -253,7 +332,7 @@ export default function Home() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [slides.length, currentSlideIndex]);
+  }, [slides.length, currentSlideIndex, isPositioningEnabled]);
 
   // Render current slide
   const renderSlide = () => {
@@ -270,7 +349,19 @@ export default function Home() {
       );
     }
 
-    const currentSlide = slides[currentSlideIndex];
+    // Use safe index to prevent accessing undefined slide
+    const safeIndex = Math.min(currentSlideIndex, slides.length - 1);
+    const currentSlide = slides[safeIndex];
+
+    // Extra safety check
+    if (!currentSlide) {
+      return (
+        <div className="w-full h-full flex items-center justify-center">
+          <p>Loading slide...</p>
+        </div>
+      );
+    }
+
     const props = currentSlide.props; // 슬라이드별 props 사용
 
     // onUpdate 핸들러
@@ -278,77 +369,247 @@ export default function Home() {
       updateSlideProps(currentSlideIndex, newProps);
     };
 
-    switch (currentSlide.type) {
-      case "TitleSlide":
-        return <TitleSlide {...props} onUpdate={handleUpdate} />;
-      case "SectionTitle":
-        return <SectionTitle {...props} onUpdate={handleUpdate} />;
-      case "ContentSlide":
-        return <ContentSlide {...props} onUpdate={handleUpdate} />;
-      case "TwoColumn":
-        return <TwoColumn {...props} onUpdate={handleUpdate} />;
-      case "BulletPoints":
-        return <BulletPoints {...props} onUpdate={handleUpdate} />;
-      case "QuoteSlide":
-        return <QuoteSlide {...props} onUpdate={handleUpdate} />;
-      case "ImageWithCaption":
-        return <ImageWithCaption {...props} onUpdate={handleUpdate} />;
-      case "ThankYou":
-        return <ThankYou {...props} onUpdate={handleUpdate} />;
-      default:
-        return null;
+    const TemplateComponent = TEMPLATE_REGISTRY[currentSlide.type]?.component;
+
+    if (!TemplateComponent) {
+      return (
+        <div className="w-full h-full flex items-center justify-center">
+          <p>Template not found: {currentSlide.type}</p>
+        </div>
+      );
+    }
+
+    return (
+      <TemplateComponent
+        {...props}
+        onUpdate={handleUpdate}
+        isPositioningEnabled={isPositioningEnabled}
+        selectedElementId={selectedElementId}
+        onSelectElement={setSelectedElementId}
+      />
+    );
+  };
+
+  // Reset position handler
+  const handleResetPosition = () => {
+    if (selectedElementId && slides.length > 0) {
+      const currentSlide = slides[currentSlideIndex];
+      const updatedPositions = { ...currentSlide.props.positions };
+      delete updatedPositions[selectedElementId];
+      updateSlideProps(currentSlideIndex, { positions: updatedPositions });
+      setSelectedElementId(null);
     }
   };
 
   return (
-    <main className="relative">
-      {/* Auto-save Indicator */}
-      {slides.length > 0 && !isFullscreen && (
-        <div className="fixed top-6 right-24 z-40">
-          <AutoSaveIndicator lastSaved={lastSaved} isSaving={isSaving} />
-        </div>
-      )}
+    <EditProvider>
+      <>
+        <main className="relative min-h-screen">
+          {/* Finder-style Layout */}
+          {!isFullscreen && !isPresentMode && (
+            <>
+              {/* Compact Navigator - Fixed Left Sidebar */}
+              <CompactNavigator
+                slides={slides}
+                currentSlideIndex={currentSlideIndex}
+                onSelectSlide={handleSelectSlide}
+                onOpenTemplates={() => setIsTemplatesOpen(true)}
+                onOpenSettings={() => setIsSettingsOpen(true)}
+                onOpenShortcuts={() => setShowShortcuts(true)}
+                onDeleteSlide={handleDeleteSlide}
+                onDuplicateSlide={handleDuplicateSlide}
+                onMoveSlide={(fromIndex, toIndex) => {
+                  reorderSlides(fromIndex, toIndex);
+                  setCurrentSlideIndex(toIndex);
+                }}
+              />
 
-      {/* Slide Container with dynamic margin when sidebar is open */}
-        <div
-          className="transition-all duration-300"
-          style={{
-            marginLeft: isSidebarOpen && !isFullscreen ? "384px" : "0",
-          }}
-        >
+              {/* Unified Toolbar - Full Width */}
+              <UnifiedToolbar
+                canUndo={canUndo}
+                canRedo={canRedo}
+                onUndo={handleUndo}
+                onRedo={handleRedo}
+                onOpenHistory={() => setShowHistoryPanel(true)}
+                currentSlideIndex={currentSlideIndex}
+                totalSlides={slides.length}
+                isPositioningEnabled={isPositioningEnabled}
+                onTogglePositioning={() => {
+                  setIsPositioningEnabled(!isPositioningEnabled);
+                  setSelectedElementId(null);
+                }}
+                showGrid={showGrid}
+                onToggleGrid={() => setShowGrid(!showGrid)}
+                onOpenTransitions={() => setShowTransitionsModal(true)}
+                zoom={zoom}
+                onZoomIn={handleZoomIn}
+                onZoomOut={handleZoomOut}
+                canZoomIn={canZoomIn}
+                canZoomOut={canZoomOut}
+                aspectRatio={aspectRatio}
+                onAspectRatioChange={setAspectRatio}
+                lastSaved={lastSaved}
+                isSaving={isSaving}
+              />
+            </>
+          )}
+
+          {/* Main Content Area - Fixed margin for sidebar and toolbar */}
           <div
+            className="transition-all duration-300"
             style={{
-              transform: `scale(${zoom})`,
-              transformOrigin: "center",
-              transition: "transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)",
+              marginLeft: !isFullscreen && !isPresentMode ? "220px" : "0",
+              marginTop: !isFullscreen && !isPresentMode ? "56px" : "0",
+              minHeight: !isFullscreen && !isPresentMode ? "calc(100vh - 56px)" : "100vh",
             }}
           >
-            <SlideCanvas aspectRatio={aspectRatio} isFullscreen={isFullscreen}>
-              <AnimatePresence mode="wait" custom={slideDirection}>
-                <motion.div
-                  key={currentSlideIndex}
-                  custom={slideDirection}
-                  {...(transitionType !== "none"
-                    ? typeof transitionVariants[transitionType] === "function"
-                      ? (transitionVariants[transitionType] as Function)(slideDirection)
-                      : transitionVariants[transitionType]
-                    : transitionVariants.none)}
-                  className="w-full h-full"
-                >
-                  {renderSlide()}
-                </motion.div>
-              </AnimatePresence>
-            </SlideCanvas>
+            <div
+              className="flex items-center justify-center"
+              style={{
+                minHeight: !isFullscreen && !isPresentMode ? "calc(100vh - 56px)" : "100vh",
+              }}
+            >
+              <div
+                style={{
+                  transform: `scale(${zoom})`,
+                  transformOrigin: "center",
+                  transition: "transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)",
+                }}
+              >
+                <SlideCanvas aspectRatio={aspectRatio} isFullscreen={isFullscreen}>
+                  <AnimatePresence mode="wait" custom={slideDirection}>
+                    <motion.div
+                      key={currentSlideIndex}
+                      custom={slideDirection}
+                      {...(transitionType !== "none"
+                        ? typeof transitionVariants[transitionType] === "function"
+                          ? (transitionVariants[transitionType] as Function)(slideDirection)
+                          : transitionVariants[transitionType]
+                        : transitionVariants.none)}
+                      className="w-full h-full"
+                    >
+                      {renderSlide()}
+                    </motion.div>
+                  </AnimatePresence>
+                </SlideCanvas>
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* Slide Counter */}
-        {slides.length > 0 && !isFullscreen && (
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-black/70 text-white text-sm font-mono rounded-lg backdrop-blur-sm">
-            {currentSlideIndex + 1} / {slides.length}
-          </div>
-        )}
+          {/* Settings Sidebar (Modal) */}
+          <SimpleSettingsSidebar
+            aspectRatio={aspectRatio}
+            onAspectRatioChange={setAspectRatio}
+            isFullscreen={isFullscreen}
+            onFullscreenChange={setIsFullscreen}
+          />
 
+          {/* Floating Inspector */}
+          <FloatingInspector
+            slide={slides[currentSlideIndex] || null}
+            isOpen={isInspectorOpen && slides.length > 0}
+            onClose={() => setIsInspectorOpen(false)}
+            onUpdate={(newProps) => {
+              updateSlideProps(currentSlideIndex, newProps);
+            }}
+          />
+
+          {/* Editor Panel */}
+          {editingSlideIndex !== null && (
+            <EditorPanel
+              slide={slides[editingSlideIndex] || null}
+              onClose={() => setEditingSlideIndex(null)}
+              onUpdate={(newProps) => {
+                if (editingSlideIndex !== null) {
+                  updateSlideProps(editingSlideIndex, newProps);
+                }
+              }}
+            />
+          )}
+
+          {/* Command Palette */}
+          <CommandPalette
+            open={isCommandPaletteOpen}
+            onOpenChange={setIsCommandPaletteOpen}
+            onAddSlide={handleAddSlide}
+            onDuplicateSlide={() => handleDuplicateSlide()}
+            onDeleteSlide={() => handleDeleteSlide(currentSlideIndex)}
+            onOpenInspector={() => setIsInspectorOpen(true)}
+            onStartPresent={handleStartPresent}
+            onZoomIn={handleZoomIn}
+            onZoomOut={handleZoomOut}
+            onShowShortcuts={() => setShowShortcuts(true)}
+            slides={slides}
+            onGoToSlide={setCurrentSlideIndex}
+          />
+
+          {/* Present Mode */}
+          <PresentMode
+            isOpen={isPresentMode}
+            onClose={handleExitPresent}
+            slides={slides}
+            initialSlideIndex={currentSlideIndex}
+            renderSlide={(slide) => {
+              const props = slide.props;
+              const handleUpdate = (newProps: Partial<any>) => {
+                const index = slides.findIndex((s) => s.id === slide.id);
+                if (index !== -1) {
+                  updateSlideProps(index, newProps);
+                }
+              };
+
+              const TemplateComponent = TEMPLATE_REGISTRY[slide.type]?.component;
+              if (!TemplateComponent) return null;
+
+              return <TemplateComponent {...props} onUpdate={handleUpdate} />;
+            }}
+          />
+
+          {/* Keyboard Shortcuts Help */}
+          <KeyboardShortcutsHelp isOpen={showShortcuts} onOpenChange={setShowShortcuts} />
+
+          {/* Slide Transitions Modal (no floating button) */}
+          {slides.length > 0 && !isFullscreen && !isPresentMode && (
+            <SlideTransitions
+              currentTransition={transitionType}
+              onTransitionChange={setTransitionType}
+              isOpen={showTransitionsModal}
+              onOpenChange={setShowTransitionsModal}
+            />
+          )}
+
+          {/* Grid & Guides Overlay (no floating button) */}
+          {slides.length > 0 && !isFullscreen && !isPresentMode && showGrid && (
+            <GridGuides aspectRatio={aspectRatio} />
+          )}
+        </main>
+
+        {/* Undo/Redo Toast */}
+        <UndoRedoToast
+          open={showToast}
+          onClose={() => setShowToast(false)}
+          action={toastAction}
+          description={toastDescription}
+          onActionClick={toastAction === "undo" ? handleRedo : handleUndo}
+        />
+
+        {/* Keyboard Indicator */}
+        <KeyboardIndicator keys={keyboardKeys} show={showKeyboardIndicator} />
+
+        {/* History Panel */}
+        <HistoryPanel
+          open={showHistoryPanel}
+          onClose={() => setShowHistoryPanel(false)}
+          historyStates={historyStates || []}
+          currentIndex={currentHistoryIndex || 0}
+          onGoToIndex={(index) => {
+            goToHistoryIndex(index);
+            setShowHistoryPanel(false);
+          }}
+          lastActionDescription={lastActionDescription}
+        />
+
+        {/* Templates Sidebar */}
         <TemplatesSidebar
           slides={slides}
           currentSlideIndex={currentSlideIndex}
@@ -356,108 +617,16 @@ export default function Home() {
           onSelectSlide={handleSelectSlide}
           onDeleteSlide={handleDeleteSlide}
           onDuplicateSlide={handleDuplicateSlide}
-          onReorderSlides={reorderSlides}
-          onOpenInspector={() => setIsInspectorOpen(true)}
-          isOpen={isSidebarOpen}
-          onToggle={setIsSidebarOpen}
-        />
-
-        <SimpleSettingsSidebar
-          aspectRatio={aspectRatio}
-          onAspectRatioChange={setAspectRatio}
-          isFullscreen={isFullscreen}
-          onFullscreenChange={setIsFullscreen}
-        />
-
-        {/* Floating Inspector */}
-        <FloatingInspector
-          slide={slides[currentSlideIndex] || null}
-          isOpen={isInspectorOpen && slides.length > 0}
-          onClose={() => setIsInspectorOpen(false)}
-          onUpdate={(newProps) => {
-            updateSlideProps(currentSlideIndex, newProps);
+          onReorderSlides={(fromIndex, toIndex) => {
+            reorderSlides(fromIndex, toIndex);
+            setCurrentSlideIndex(toIndex);
           }}
-        />
-
-        {/* Command Palette */}
-        <CommandPalette
-          open={isCommandPaletteOpen}
-          onOpenChange={setIsCommandPaletteOpen}
-          onAddSlide={handleAddSlide}
-          onDuplicateSlide={() => handleDuplicateSlide()}
-          onDeleteSlide={() => handleDeleteSlide(currentSlideIndex)}
           onOpenInspector={() => setIsInspectorOpen(true)}
-          onStartPresent={handleStartPresent}
-          onZoomIn={handleZoomIn}
-          onZoomOut={handleZoomOut}
-          onShowShortcuts={() => setShowShortcuts(true)}
-          slides={slides}
-          onGoToSlide={setCurrentSlideIndex}
+          onOpenEditor={setEditingSlideIndex}
+          isOpen={isTemplatesOpen}
+          onToggle={setIsTemplatesOpen}
         />
-
-        {/* Zoom Controls */}
-        {slides.length > 0 && !isFullscreen && !isPresentMode && (
-          <ZoomControls
-            zoom={zoom}
-            onZoomIn={handleZoomIn}
-            onZoomOut={handleZoomOut}
-            onFitToScreen={handleFitToScreen}
-          />
-        )}
-
-        {/* Present Mode */}
-        <PresentMode
-          isOpen={isPresentMode}
-          onClose={handleExitPresent}
-          slides={slides}
-          initialSlideIndex={currentSlideIndex}
-          renderSlide={(slide) => {
-            const props = slide.props;
-            const handleUpdate = (newProps: Partial<any>) => {
-              const index = slides.findIndex((s) => s.id === slide.id);
-              if (index !== -1) {
-                updateSlideProps(index, newProps);
-              }
-            };
-
-            switch (slide.type) {
-              case "TitleSlide":
-                return <TitleSlide {...props} onUpdate={handleUpdate} />;
-              case "SectionTitle":
-                return <SectionTitle {...props} onUpdate={handleUpdate} />;
-              case "ContentSlide":
-                return <ContentSlide {...props} onUpdate={handleUpdate} />;
-              case "TwoColumn":
-                return <TwoColumn {...props} onUpdate={handleUpdate} />;
-              case "BulletPoints":
-                return <BulletPoints {...props} onUpdate={handleUpdate} />;
-              case "QuoteSlide":
-                return <QuoteSlide {...props} onUpdate={handleUpdate} />;
-              case "ImageWithCaption":
-                return <ImageWithCaption {...props} onUpdate={handleUpdate} />;
-              case "ThankYou":
-                return <ThankYou {...props} onUpdate={handleUpdate} />;
-              default:
-                return null;
-            }
-          }}
-        />
-
-        {/* Keyboard Shortcuts Help */}
-        <KeyboardShortcutsHelp isOpen={showShortcuts} onOpenChange={setShowShortcuts} />
-
-        {/* Slide Transitions */}
-        {slides.length > 0 && !isFullscreen && !isPresentMode && (
-          <SlideTransitions
-            currentTransition={transitionType}
-            onTransitionChange={setTransitionType}
-          />
-        )}
-
-        {/* Grid & Guides */}
-        {slides.length > 0 && !isFullscreen && !isPresentMode && (
-          <GridGuides aspectRatio={aspectRatio} />
-        )}
-      </main>
+      </>
+    </EditProvider>
   );
 }

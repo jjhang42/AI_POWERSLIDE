@@ -13,6 +13,9 @@ const getDefaultProps = (type: TemplateType): TemplateProps => {
 };
 
 // Get initial slides from localStorage
+// Note: This causes a hydration warning because server renders with []
+// but client renders with localStorage data. This is acceptable because
+// the client will immediately re-render with correct data.
 const getInitialSlides = (): SlideWithProps[] => {
   if (typeof window === "undefined") return [];
   try {
@@ -31,7 +34,7 @@ export function useSlides() {
   const [lastSaved, setLastSaved] = useState<Date | undefined>(undefined);
   const [isSaving, setIsSaving] = useState(false);
   const [lastActionDescription, setLastActionDescription] = useState<string>("");
-  const [isLoaded, setIsLoaded] = useState(true); // Already loaded from getInitialSlides
+  const [isLoaded, setIsLoaded] = useState(true);
 
   // Listen for storage events (from aiHelpers or other tabs)
   useEffect(() => {

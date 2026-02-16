@@ -456,17 +456,17 @@ export default function Home() {
 
           {/* Main Content Area - Fixed margin for sidebar and toolbar */}
           <div
-            className="transition-all duration-300"
+            className="transition-all duration-300 bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950"
             style={{
               marginLeft: !isFullscreen && !isPresentMode ? "220px" : "0",
-              marginTop: !isFullscreen && !isPresentMode ? "56px" : "0",
-              minHeight: !isFullscreen && !isPresentMode ? "calc(100vh - 56px)" : "100vh",
+              marginTop: !isFullscreen && !isPresentMode ? "0" : "0",
+              minHeight: "100vh",
             }}
           >
             <div
               className="flex items-center justify-center"
               style={{
-                minHeight: !isFullscreen && !isPresentMode ? "calc(100vh - 56px)" : "100vh",
+                minHeight: "100vh",
               }}
             >
               <div

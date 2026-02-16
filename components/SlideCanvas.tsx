@@ -123,19 +123,10 @@ export function SlideCanvas({ children, aspectRatio, isFullscreen = false }: Sli
   return (
     <div
       className="w-full h-screen flex items-center justify-center relative overflow-hidden"
-      style={{
-        background: `repeating-linear-gradient(
-          45deg,
-          hsl(var(--muted)),
-          hsl(var(--muted)) 10px,
-          hsl(var(--muted) / 0.8) 10px,
-          hsl(var(--muted) / 0.8) 20px
-        )`,
-      }}
     >
       {/* Slide Container */}
       <div
-        className="relative bg-background shadow-2xl"
+        className="relative bg-white dark:bg-slate-900 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.6)] ring-1 ring-black/5 dark:ring-white/10"
         style={{
           aspectRatio: `${ratio}`,
           width: isFullscreen ? "100vw" : "90vw",

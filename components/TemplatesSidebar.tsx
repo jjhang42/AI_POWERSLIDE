@@ -35,16 +35,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { SlideCard } from "@/components/SlideCard";
 import { SlideWithProps } from "@/lib/types/slides";
-
-export type TemplateType =
-  | "TitleSlide"
-  | "SectionTitle"
-  | "ContentSlide"
-  | "TwoColumn"
-  | "BulletPoints"
-  | "QuoteSlide"
-  | "ImageWithCaption"
-  | "ThankYou";
+import { TEMPLATES, TemplateType } from "@/components/templates";
 
 export interface Slide {
   id: string;
@@ -61,20 +52,10 @@ interface TemplatesSidebarProps {
   onDuplicateSlide: (index: number) => void;
   onReorderSlides: (startIndex: number, endIndex: number) => void;
   onOpenInspector: () => void;
+  onOpenEditor?: (index: number) => void;
   isOpen?: boolean;
   onToggle?: (open: boolean) => void;
 }
-
-const TEMPLATES = [
-  { type: "TitleSlide" as TemplateType, name: "Title Slide", icon: Heading1 },
-  { type: "SectionTitle" as TemplateType, name: "Section", icon: Square },
-  { type: "ContentSlide" as TemplateType, name: "Content", icon: FileText },
-  { type: "TwoColumn" as TemplateType, name: "Two Column", icon: Columns2 },
-  { type: "BulletPoints" as TemplateType, name: "Bullet Points", icon: List },
-  { type: "QuoteSlide" as TemplateType, name: "Quote", icon: Quote },
-  { type: "ImageWithCaption" as TemplateType, name: "Image", icon: ImageIcon },
-  { type: "ThankYou" as TemplateType, name: "Thank You", icon: Smile },
-];
 
 // Sortable Item wrapper
 function SortableSlideCard({
@@ -85,6 +66,7 @@ function SortableSlideCard({
   onDuplicate,
   onDelete,
   onInspector,
+  onEditor,
 }: {
   slide: SlideWithProps;
   index: number;
@@ -93,6 +75,7 @@ function SortableSlideCard({
   onDuplicate: () => void;
   onDelete: () => void;
   onInspector: () => void;
+  onEditor?: () => void;
 }) {
   const {
     attributes,
@@ -118,6 +101,7 @@ function SortableSlideCard({
         onDuplicate={onDuplicate}
         onDelete={onDelete}
         onInspector={onInspector}
+        onEditor={onEditor}
         dragHandleProps={listeners}
         isDragging={isDragging}
       />
@@ -134,6 +118,7 @@ export function TemplatesSidebar({
   onDuplicateSlide,
   onReorderSlides,
   onOpenInspector,
+  onOpenEditor,
   isOpen: controlledIsOpen,
   onToggle,
 }: TemplatesSidebarProps) {
@@ -181,27 +166,6 @@ export function TemplatesSidebar({
 
   return (
     <>
-      {/* Toggle Button */}
-      {!isOpen && (
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.5 }}
-          className="fixed top-6 left-6 z-40"
-        >
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleToggle(true)}
-            className="rounded-full px-4 py-2 bg-card/80 backdrop-blur-md border border-border shadow-lg hover:bg-card/90 transition-all"
-          >
-            <PanelLeftOpen className="w-4 h-4 mr-2" />
-            <span className="text-sm font-medium">Templates</span>
-          </Button>
-        </motion.div>
-      )}
-
       {/* Sidebar */}
       <AnimatePresence>
         {isOpen && (
@@ -295,6 +259,7 @@ export function TemplatesSidebar({
                             onDuplicate={() => onDuplicateSlide(index)}
                             onDelete={() => onDeleteSlide(index)}
                             onInspector={onOpenInspector}
+                            onEditor={onOpenEditor ? () => onOpenEditor(index) : undefined}
                           />
                         ))}
                       </div>

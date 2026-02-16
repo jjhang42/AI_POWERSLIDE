@@ -165,12 +165,6 @@ export function SlideCanvas({ children, aspectRatio, isFullscreen = false }: Sli
           </div>
         )}
 
-        {/* Aspect Ratio Label */}
-        {!isFullscreen && (
-          <div className="absolute top-4 right-4 px-3 py-1 bg-black/50 text-white text-sm font-mono rounded">
-            {aspectRatio} ({dimensions.width}×{dimensions.height})
-          </div>
-        )}
       </div>
     </div>
   );

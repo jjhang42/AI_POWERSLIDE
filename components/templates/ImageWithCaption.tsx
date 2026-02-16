@@ -4,34 +4,40 @@
  */
 
 import Image from "next/image";
-
-interface ImageWithCaptionProps {
-  title?: string;
-  imageSrc: string;
-  imageAlt: string;
-  caption?: string;
-  layout?: "full" | "contained";
-}
+import { EditableText } from "@/components/editor/EditableText";
+import { ImageWithCaptionProps } from "@/lib/types/slides";
 
 export function ImageWithCaption({
   title,
   imageSrc,
   imageAlt,
   caption,
-  layout = "contained"
-}: ImageWithCaptionProps) {
+  layout = "contained",
+  className = "",
+  style,
+  backgroundColor = "",
+  textColor = "",
+  onUpdate
+}: ImageWithCaptionProps & {
+  onUpdate?: (newProps: Partial<ImageWithCaptionProps>) => void;
+}) {
   return (
-    <div className="w-full h-full flex flex-col p-16">
+    <div
+      className={`w-full h-full flex flex-col ${backgroundColor} ${className} p-16`}
+      style={style}
+    >
       {/* Title */}
       {title && (
-        <h2 className="text-5xl font-bold tracking-tight mb-8">
-          {title}
-        </h2>
+        <EditableText
+          value={title}
+          onChange={(newTitle) => onUpdate?.({ title: newTitle })}
+          className={`text-5xl font-bold tracking-tight mb-8 ${textColor}`}
+        />
       )}
 
       {/* Image Container */}
       <div className="flex-1 flex flex-col items-center justify-center">
-        <div className={`relative ${layout === "full" ? "w-full h-full" : "max-w-4xl max-h-[600px]"} rounded-lg overflow-hidden shadow-2xl`}>
+        <div className={`relative ${layout === "fullscreen" ? "w-full h-full" : "max-w-4xl max-h-[600px]"} rounded-lg overflow-hidden shadow-2xl`}>
           <Image
             src={imageSrc}
             alt={imageAlt}
@@ -42,9 +48,11 @@ export function ImageWithCaption({
 
         {/* Caption */}
         {caption && (
-          <p className="text-xl text-muted-foreground text-center mt-6 max-w-3xl">
-            {caption}
-          </p>
+          <EditableText
+            value={caption}
+            onChange={(newCaption) => onUpdate?.({ caption: newCaption })}
+            className={`text-xl ${textColor || 'text-muted-foreground'} text-center mt-6 max-w-3xl`}
+          />
         )}
       </div>
     </div>

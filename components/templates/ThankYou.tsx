@@ -3,52 +3,64 @@
  * 마무리 슬라이드
  */
 
-interface ThankYouProps {
-  message?: string;
-  contact?: {
-    email?: string;
-    phone?: string;
-    website?: string;
-  };
-  cta?: string;
-}
+import { EditableText } from "@/components/editor/EditableText";
+import { ThankYouProps } from "@/lib/types/slides";
 
 export function ThankYou({
   message = "Thank You",
   contact,
-  cta
-}: ThankYouProps) {
+  cta,
+  className = "",
+  style,
+  backgroundColor = "bg-gradient-to-br from-primary/10 via-background to-background",
+  textColor = "",
+  onUpdate
+}: ThankYouProps & {
+  onUpdate?: (newProps: Partial<ThankYouProps>) => void;
+}) {
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-primary/10 via-background to-background p-16">
+    <div
+      className={`w-full h-full flex flex-col items-center justify-center ${backgroundColor} ${className} p-16`}
+      style={style}
+    >
       {/* Thank You Message */}
-      <h1 className="text-8xl font-black tracking-tight text-center mb-8">
-        {message}
-      </h1>
+      <EditableText
+        value={message}
+        onChange={(newMessage) => onUpdate?.({ message: newMessage })}
+        className={`text-8xl font-black tracking-tight text-center mb-8 ${textColor}`}
+      />
 
       {/* CTA */}
       {cta && (
-        <p className="text-3xl text-muted-foreground text-center mb-12 max-w-3xl">
-          {cta}
-        </p>
+        <EditableText
+          value={cta}
+          onChange={(newCta) => onUpdate?.({ cta: newCta })}
+          className={`text-3xl ${textColor || 'text-muted-foreground'} text-center mb-12 max-w-3xl`}
+        />
       )}
 
       {/* Contact Information */}
       {contact && (
         <div className="mt-auto space-y-3 text-center">
           {contact.email && (
-            <p className="text-xl text-foreground">
-              <span className="text-muted-foreground">Email:</span> {contact.email}
-            </p>
-          )}
-          {contact.phone && (
-            <p className="text-xl text-foreground">
-              <span className="text-muted-foreground">Phone:</span> {contact.phone}
-            </p>
+            <div className={`text-xl ${textColor || 'text-foreground'}`}>
+              <span className={textColor || 'text-muted-foreground'}>Email:</span>{" "}
+              <EditableText
+                value={contact.email}
+                onChange={(newEmail) => onUpdate?.({ contact: { ...contact, email: newEmail } })}
+                className="inline"
+              />
+            </div>
           )}
           {contact.website && (
-            <p className="text-xl text-foreground">
-              <span className="text-muted-foreground">Web:</span> {contact.website}
-            </p>
+            <div className={`text-xl ${textColor || 'text-foreground'}`}>
+              <span className={textColor || 'text-muted-foreground'}>Web:</span>{" "}
+              <EditableText
+                value={contact.website}
+                onChange={(newWebsite) => onUpdate?.({ contact: { ...contact, website: newWebsite } })}
+                className="inline"
+              />
+            </div>
           )}
         </div>
       )}

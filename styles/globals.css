@@ -278,6 +278,98 @@ main {
     -moz-osx-font-smoothing: grayscale;
     text-rendering: geometricPrecision;
   }
+
+  /* Apple SF Pro Typography Scale */
+  .text-sf-hero {
+    font-size: 72px;
+    line-height: 1.05;
+    font-weight: 900;
+    letter-spacing: -0.005em;
+  }
+
+  .text-sf-display-1 {
+    font-size: 48px;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: -0.003em;
+  }
+
+  .text-sf-display-2 {
+    font-size: 40px;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -0.002em;
+  }
+
+  .text-sf-title-1 {
+    font-size: 28px;
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+
+  .text-sf-title-2 {
+    font-size: 22px;
+    line-height: 1.3;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+
+  .text-sf-title-3 {
+    font-size: 20px;
+    line-height: 1.3;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+
+  .text-sf-body {
+    font-size: 17px;
+    line-height: 1.5;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  .text-sf-body-emphasized {
+    font-size: 17px;
+    line-height: 1.5;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+
+  .text-sf-callout {
+    font-size: 16px;
+    line-height: 1.4;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  .text-sf-subheadline {
+    font-size: 15px;
+    line-height: 1.4;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  .text-sf-footnote {
+    font-size: 13px;
+    line-height: 1.4;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  .text-sf-caption-1 {
+    font-size: 12px;
+    line-height: 1.3;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  .text-sf-caption-2 {
+    font-size: 11px;
+    line-height: 1.3;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
 }
 
 /* Container Sizes */

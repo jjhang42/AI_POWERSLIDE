@@ -7,7 +7,6 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Plus,
-  Trash2,
   FileText,
   Heading1,
   Columns2,
@@ -17,6 +16,25 @@ import {
   Smile,
   Square,
 } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { SlideCard } from "@/components/SlideCard";
+import { SlideWithProps } from "@/lib/types/slides";
 
 export type TemplateType =
   | "TitleSlide"
@@ -35,11 +53,16 @@ export interface Slide {
 }
 
 interface TemplatesSidebarProps {
-  slides: Slide[];
+  slides: SlideWithProps[];
   currentSlideIndex: number;
   onAddSlide: (type: TemplateType) => void;
   onSelectSlide: (index: number) => void;
   onDeleteSlide: (index: number) => void;
+  onDuplicateSlide: (index: number) => void;
+  onReorderSlides: (startIndex: number, endIndex: number) => void;
+  onOpenInspector: () => void;
+  isOpen?: boolean;
+  onToggle?: (open: boolean) => void;
 }
 
 const TEMPLATES = [
@@ -53,14 +76,108 @@ const TEMPLATES = [
   { type: "ThankYou" as TemplateType, name: "Thank You", icon: Smile },
 ];
 
+// Sortable Item wrapper
+function SortableSlideCard({
+  slide,
+  index,
+  isActive,
+  onSelect,
+  onDuplicate,
+  onDelete,
+  onInspector,
+}: {
+  slide: SlideWithProps;
+  index: number;
+  isActive: boolean;
+  onSelect: () => void;
+  onDuplicate: () => void;
+  onDelete: () => void;
+  onInspector: () => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: slide.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes}>
+      <SlideCard
+        slide={slide}
+        index={index}
+        isActive={isActive}
+        onClick={onSelect}
+        onDuplicate={onDuplicate}
+        onDelete={onDelete}
+        onInspector={onInspector}
+        dragHandleProps={listeners}
+        isDragging={isDragging}
+      />
+    </div>
+  );
+}
+
 export function TemplatesSidebar({
   slides,
   currentSlideIndex,
   onAddSlide,
   onSelectSlide,
   onDeleteSlide,
+  onDuplicateSlide,
+  onReorderSlides,
+  onOpenInspector,
+  isOpen: controlledIsOpen,
+  onToggle,
 }: TemplatesSidebarProps) {
-  const [isOpen, setIsOpen] = useState(true);
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen;
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = slides.findIndex((s) => s.id === active.id);
+      const newIndex = slides.findIndex((s) => s.id === over.id);
+
+      onReorderSlides(oldIndex, newIndex);
+
+      // Update current slide index if needed
+      if (oldIndex === currentSlideIndex) {
+        onSelectSlide(newIndex);
+      } else if (oldIndex < currentSlideIndex && newIndex >= currentSlideIndex) {
+        onSelectSlide(currentSlideIndex - 1);
+      } else if (oldIndex > currentSlideIndex && newIndex <= currentSlideIndex) {
+        onSelectSlide(currentSlideIndex + 1);
+      }
+    }
+  };
+
+  const handleToggle = (open: boolean) => {
+    if (onToggle) {
+      onToggle(open);
+    } else {
+      setInternalIsOpen(open);
+    }
+  };
 
   return (
     <>
@@ -76,7 +193,7 @@ export function TemplatesSidebar({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setIsOpen(true)}
+            onClick={() => handleToggle(true)}
             className="rounded-full px-4 py-2 bg-card/80 backdrop-blur-md border border-border shadow-lg hover:bg-card/90 transition-all"
           >
             <PanelLeftOpen className="w-4 h-4 mr-2" />
@@ -89,11 +206,15 @@ export function TemplatesSidebar({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ x: "-100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "-100%" }}
-            transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="fixed left-0 top-0 h-full w-full max-w-sm bg-card border-r border-border shadow-2xl z-30 overflow-y-auto"
+            initial={{ x: "-100%", opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: "-100%", opacity: 0 }}
+            transition={{
+              type: "tween",
+              ease: [0.25, 0.1, 0.25, 1],
+              duration: 0.3
+            }}
+            className="fixed left-0 top-0 h-full w-full max-w-sm bg-card/95 backdrop-blur-xl border-r border-border shadow-2xl z-30 overflow-y-auto"
           >
             {/* Header */}
             <div className="sticky top-0 bg-card/95 backdrop-blur-md border-b border-border p-6 flex items-center justify-between z-10">
@@ -106,7 +227,7 @@ export function TemplatesSidebar({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setIsOpen(false)}
+                onClick={() => handleToggle(false)}
                 className="rounded-full w-9 h-9 p-0"
               >
                 <PanelLeftClose className="w-5 h-5" />
@@ -154,56 +275,31 @@ export function TemplatesSidebar({
                     <p className="text-xs mt-1">Add a template to start</p>
                   </div>
                 ) : (
-                  <div className="space-y-2">
-                    {slides.map((slide, index) => (
-                      <motion.div
-                        key={slide.id}
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        className={`group flex items-center gap-3 p-3 rounded-lg border transition-all cursor-pointer ${
-                          index === currentSlideIndex
-                            ? "bg-primary/10 border-primary"
-                            : "bg-muted/30 border-border hover:bg-muted/50"
-                        }`}
-                        onClick={() => onSelectSlide(index)}
-                      >
-                        {/* Slide Number */}
-                        <div
-                          className={`flex-shrink-0 w-8 h-8 rounded flex items-center justify-center text-xs font-bold ${
-                            index === currentSlideIndex
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-muted text-muted-foreground"
-                          }`}
-                        >
-                          {index + 1}
-                        </div>
-
-                        {/* Slide Info */}
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">
-                            {slide.name}
-                          </p>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {slide.type}
-                          </p>
-                        </div>
-
-                        {/* Delete Button */}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDeleteSlide(index);
-                          }}
-                        >
-                          <Trash2 className="w-4 h-4 text-destructive" />
-                        </Button>
-                      </motion.div>
-                    ))}
-                  </div>
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
+                  >
+                    <SortableContext
+                      items={slides.map((s) => s.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      <div className="space-y-2">
+                        {slides.map((slide, index) => (
+                          <SortableSlideCard
+                            key={slide.id}
+                            slide={slide}
+                            index={index}
+                            isActive={index === currentSlideIndex}
+                            onSelect={() => onSelectSlide(index)}
+                            onDuplicate={() => onDuplicateSlide(index)}
+                            onDelete={() => onDeleteSlide(index)}
+                            onInspector={onOpenInspector}
+                          />
+                        ))}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
                 )}
               </div>
             </div>

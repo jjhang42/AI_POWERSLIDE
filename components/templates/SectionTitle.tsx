@@ -3,30 +3,47 @@
  * 섹션 구분 슬라이드
  */
 
-interface SectionTitleProps {
-  section: string;
-  title: string;
-  description?: string;
-}
+import { EditableText } from "@/components/editor/EditableText";
+import { SectionTitleProps } from "@/lib/types/slides";
 
-export function SectionTitle({ section, title, description }: SectionTitleProps) {
+export function SectionTitle({
+  section,
+  title,
+  description,
+  className = "",
+  style,
+  backgroundColor = "bg-gradient-to-br from-primary/10 via-background to-background",
+  textColor = "",
+  onUpdate
+}: SectionTitleProps & {
+  onUpdate?: (newProps: Partial<SectionTitleProps>) => void;
+}) {
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-primary/10 via-background to-background p-16">
+    <div
+      className={`w-full h-full flex flex-col items-center justify-center ${backgroundColor} ${className} p-16`}
+      style={style}
+    >
       {/* Section Number/Label */}
-      <div className="text-primary text-xl font-bold uppercase tracking-widest mb-4">
-        {section}
-      </div>
+      <EditableText
+        value={section}
+        onChange={(newSection) => onUpdate?.({ section: newSection })}
+        className={`${textColor || 'text-primary'} text-xl font-bold uppercase tracking-widest mb-4`}
+      />
 
       {/* Section Title */}
-      <h2 className="text-6xl font-black tracking-tight text-center mb-6 max-w-4xl">
-        {title}
-      </h2>
+      <EditableText
+        value={title}
+        onChange={(newTitle) => onUpdate?.({ title: newTitle })}
+        className={`text-6xl font-black tracking-tight text-center mb-6 max-w-4xl ${textColor}`}
+      />
 
       {/* Description */}
       {description && (
-        <p className="text-2xl text-muted-foreground text-center max-w-3xl">
-          {description}
-        </p>
+        <EditableText
+          value={description}
+          onChange={(newDescription) => onUpdate?.({ description: newDescription })}
+          className={`text-2xl ${textColor || 'text-muted-foreground'} text-center max-w-3xl`}
+        />
       )}
     </div>
   );

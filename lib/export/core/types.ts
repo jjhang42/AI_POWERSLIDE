@@ -11,8 +11,8 @@ export type ExportQuality = "low" | "medium" | "high";
 // 내보내기 상태
 export type ExportStatus = "idle" | "preparing" | "capturing" | "generating" | "completed" | "error" | "cancelled";
 
-// 섹션 정보 (NavigationContext에서 가져옴)
-export interface SectionInfo {
+// 슬라이드 정보 (useSlides에서 가져옴)
+export interface SlideInfo {
   id: string;
   index: number;
   ref: React.RefObject<HTMLDivElement | null>;
@@ -33,12 +33,12 @@ export interface ExportOptions {
   format: ExportFormat;
   quality: ExportQuality;
   fileName?: string;
-  selectedSections?: string[]; // 특정 섹션만 선택
+  selectedSlides?: string[]; // 특정 슬라이드만 선택
   aspectRatio?: { width: number; height: number };
 }
 
-// 캡처된 섹션 데이터
-export interface CapturedSection {
+// 캡처된 슬라이드 데이터
+export interface CapturedSlide {
   id: string;
   title: string;
   imageData: string; // Base64 PNG
@@ -49,7 +49,7 @@ export interface CapturedSection {
 // Exporter 인터페이스 (개선됨)
 export interface Exporter {
   export(
-    sections: CapturedSection[],
+    slides: CapturedSlide[],
     options: ExportOptions,
     onProgress?: (progress: ExportProgress) => void
   ): Promise<ExportResult>;
@@ -78,7 +78,7 @@ export interface ExportError {
   type: ExportErrorType;
   message: string;
   details?: string;
-  sectionId?: string;
+  slideId?: string;
   timestamp: number;
 }
 
@@ -87,9 +87,9 @@ export interface ExportResult {
   success: boolean;
   error?: ExportError;
   stats?: {
-    totalSections: number;
-    capturedSections: number;
-    failedSections: number;
+    totalSlides: number;
+    capturedSlides: number;
+    failedSlides: number;
     fileSize?: number;
     duration: number;
   };
@@ -100,6 +100,6 @@ export interface ExportMetadata {
   format: ExportFormat;
   quality: ExportQuality;
   timestamp: number;
-  sectionCount: number;
+  slideCount: number;
   aspectRatio: { width: number; height: number };
 }

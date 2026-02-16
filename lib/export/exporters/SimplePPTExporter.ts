@@ -8,7 +8,7 @@
 
 import type {
   Exporter,
-  CapturedSection,
+  CapturedSlide,
   ExportOptions,
   ExportProgress,
   ExportResult,
@@ -16,7 +16,7 @@ import type {
 
 export class SimplePPTExporter implements Exporter {
   async export(
-    sections: CapturedSection[],
+    slides: CapturedSlide[],
     options: ExportOptions,
     onProgress?: (progress: ExportProgress) => void
   ): Promise<ExportResult> {
@@ -26,7 +26,7 @@ export class SimplePPTExporter implements Exporter {
       // JSZip을 동적으로 로딩
       const JSZip = (await import("jszip")).default;
       const zip = new JSZip();
-      const slideCount = sections.length;
+      const slideCount = slides.length;
 
       if (onProgress) {
         onProgress({
@@ -46,8 +46,8 @@ export class SimplePPTExporter implements Exporter {
 
       // 3. ppt 폴더 구조
       const ppt = zip.folder("ppt");
-      const slides = ppt?.folder("slides");
-      const slideRels = slides?.folder("_rels");
+      const slidesFolder = ppt?.folder("slides");
+      const slideRels = slidesFolder?.folder("_rels");
       const media = ppt?.folder("media");
       const pptRels = ppt?.folder("_rels");
 
@@ -78,7 +78,7 @@ export class SimplePPTExporter implements Exporter {
       // 9. 각 슬라이드 생성
       for (let i = 0; i < slideCount; i++) {
         const slideNum = i + 1;
-        const section = sections[i];
+        const slide = slides[i];
 
         if (onProgress) {
           onProgress({
@@ -91,13 +91,13 @@ export class SimplePPTExporter implements Exporter {
         }
 
         // 슬라이드 XML
-        slides?.file(`slide${slideNum}.xml`, this.generateSlide(slideNum));
+        slidesFolder?.file(`slide${slideNum}.xml`, this.generateSlide(slideNum));
 
         // 슬라이드 관계
         slideRels?.file(`slide${slideNum}.xml.rels`, this.generateSlideRels(slideNum));
 
         // 이미지 추가
-        const imageBlob = this.base64ToBlob(section.imageData);
+        const imageBlob = this.base64ToBlob(slide.imageData);
         media?.file(`image${slideNum}.png`, imageBlob);
       }
 
@@ -137,9 +137,9 @@ export class SimplePPTExporter implements Exporter {
       return {
         success: true,
         stats: {
-          totalSections: slideCount,
-          capturedSections: slideCount,
-          failedSections: 0,
+          totalSlides: slideCount,
+          capturedSlides: slideCount,
+          failedSlides: 0,
           fileSize: blob.size,
           duration,
         },
@@ -161,9 +161,9 @@ export class SimplePPTExporter implements Exporter {
           timestamp: Date.now(),
         },
         stats: {
-          totalSections: sections.length,
-          capturedSections: 0,
-          failedSections: sections.length,
+          totalSlides: slides.length,
+          capturedSlides: 0,
+          failedSlides: slides.length,
           duration,
         },
       };

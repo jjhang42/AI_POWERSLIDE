@@ -1,10 +1,10 @@
 /**
- * 섹션 캡처 유틸리티
+ * 슬라이드 캡처 유틸리티
  */
 
 import type {
-  SectionInfo,
-  CapturedSection,
+  SlideInfo,
+  CapturedSlide,
   ExportQuality,
   CaptureOptions,
 } from "./types";
@@ -37,31 +37,31 @@ async function waitForFonts(): Promise<void> {
 }
 
 /**
- * 섹션을 이미지로 캡처
+ * 슬라이드를 이미지로 캡처
  */
-export async function captureSection(
-  section: SectionInfo,
+export async function captureSlide(
+  slide: SlideInfo,
   quality: ExportQuality
-): Promise<CapturedSection> {
+): Promise<CapturedSlide> {
   // 동적으로 html2canvas 로딩
   const html2canvas = (await import("html2canvas")).default;
 
   // 폰트 로딩 대기
   await waitForFonts();
 
-  // Section 내부의 aspectRatio 컨테이너 찾기
-  const container = section.ref.current?.querySelector(
+  // Slide 내부의 aspectRatio 컨테이너 찾기
+  const container = slide.ref.current?.querySelector(
     '[style*="aspect-ratio"]'
   ) as HTMLElement;
 
   if (!container) {
-    throw new Error(`섹션을 찾을 수 없습니다: ${section.id}`);
+    throw new Error(`슬라이드를 찾을 수 없습니다: ${slide.id}`);
   }
 
-  // 섹션이 화면에 보이도록 스크롤
-  const sectionElement = section.ref.current;
-  if (sectionElement) {
-    sectionElement.scrollIntoView({ behavior: "instant", block: "start" });
+  // 슬라이드가 화면에 보이도록 스크롤
+  const slideElement = slide.ref.current;
+  if (slideElement) {
+    slideElement.scrollIntoView({ behavior: "instant", block: "start" });
     // 스크롤 완료 및 렌더링 대기
     await new Promise((resolve) => setTimeout(resolve, 300));
   }
@@ -83,31 +83,31 @@ export async function captureSection(
     const imageData = canvas.toDataURL("image/png", 0.95);
 
     return {
-      id: section.id,
-      title: section.title || section.id,
+      id: slide.id,
+      title: slide.title || slide.id,
       imageData,
       width: canvas.width,
       height: canvas.height,
     };
   } catch (error) {
-    console.error(`섹션 캡처 실패: ${section.id}`, error);
-    throw new Error(`섹션 캡처 실패: ${section.id}`);
+    console.error(`슬라이드 캡처 실패: ${slide.id}`, error);
+    throw new Error(`슬라이드 캡처 실패: ${slide.id}`);
   }
 }
 
 /**
- * 여러 섹션을 순차적으로 캡처
+ * 여러 슬라이드를 순차적으로 캡처
  */
-export async function captureSections(
-  sections: SectionInfo[],
+export async function captureSlides(
+  slides: SlideInfo[],
   quality: ExportQuality,
   onProgress?: (current: number, total: number) => void
-): Promise<CapturedSection[]> {
-  const capturedSections: CapturedSection[] = [];
-  const total = sections.length;
+): Promise<CapturedSlide[]> {
+  const capturedSlides: CapturedSlide[] = [];
+  const total = slides.length;
 
   for (let i = 0; i < total; i++) {
-    const section = sections[i];
+    const slide = slides[i];
 
     try {
       // 진행률 업데이트
@@ -115,19 +115,19 @@ export async function captureSections(
         onProgress(i + 1, total);
       }
 
-      // 섹션 캡처
-      const captured = await captureSection(section, quality);
-      capturedSections.push(captured);
+      // 슬라이드 캡처
+      const captured = await captureSlide(slide, quality);
+      capturedSlides.push(captured);
 
       // 메모리 정리를 위한 짧은 대기
       await new Promise((resolve) => setTimeout(resolve, 50));
     } catch (error) {
-      console.error(`섹션 ${section.id} 캡처 실패, 건너뜁니다.`, error);
-      // 실패한 섹션은 건너뛰고 계속 진행
+      console.error(`슬라이드 ${slide.id} 캡처 실패, 건너뜁니다.`, error);
+      // 실패한 슬라이드는 건너뛰고 계속 진행
     }
   }
 
-  return capturedSections;
+  return capturedSlides;
 }
 
 /**

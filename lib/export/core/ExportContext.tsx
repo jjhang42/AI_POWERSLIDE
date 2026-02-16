@@ -11,9 +11,9 @@ import type {
   ExportOptions,
   ExportProgress,
   ExportStatus,
-  CapturedSection,
+  CapturedSlide,
 } from "./types";
-import { captureSections } from "./capture";
+import { captureSlides } from "./capture";
 
 interface ExportContextType {
   progress: ExportProgress;

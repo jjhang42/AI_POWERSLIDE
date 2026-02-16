@@ -5,7 +5,7 @@
 
 import type {
   Exporter,
-  CapturedSection,
+  CapturedSlide,
   ExportOptions,
   ExportProgress,
   ExportResult,
@@ -17,7 +17,7 @@ export class ImageExporter implements Exporter {
    * 프레젠테이션을 이미지 파일들로 내보내기
    */
   async export(
-    sections: CapturedSection[],
+    slides: CapturedSlide[],
     options: ExportOptions,
     onProgress?: (progress: ExportProgress) => void
   ): Promise<ExportResult> {
@@ -27,13 +27,13 @@ export class ImageExporter implements Exporter {
       // 동적으로 file-saver 로딩
       const { saveAs } = await import("file-saver");
 
-      const total = sections.length;
+      const total = slides.length;
       const format = options.format === "jpeg" ? "jpeg" : "png";
       const mimeType = format === "jpeg" ? "image/jpeg" : "image/png";
 
-      // 각 섹션을 개별 파일로 저장
+      // 각 슬라이드를 개별 파일로 저장
       for (let i = 0; i < total; i++) {
-        const section = sections[i];
+        const slide = slides[i];
 
         // 진행률 업데이트
         if (onProgress) {
@@ -47,7 +47,7 @@ export class ImageExporter implements Exporter {
         }
 
         // Base64를 Blob으로 변환
-        let imageData = section.imageData;
+        let imageData = slide.imageData;
 
         // JPEG로 변환이 필요한 경우
         if (format === "jpeg" && imageData.startsWith("data:image/png")) {
@@ -60,7 +60,7 @@ export class ImageExporter implements Exporter {
         const fileName = this.generateFileName(
           options.fileName,
           i + 1,
-          section.title,
+          slide.title,
           format
         );
 
@@ -86,9 +86,9 @@ export class ImageExporter implements Exporter {
       return {
         success: true,
         stats: {
-          totalSections: total,
-          capturedSections: total,
-          failedSections: 0,
+          totalSlides: total,
+          capturedSlides: total,
+          failedSlides: 0,
           duration,
         },
       };
@@ -109,9 +109,9 @@ export class ImageExporter implements Exporter {
           timestamp: Date.now(),
         },
         stats: {
-          totalSections: sections.length,
-          capturedSections: 0,
-          failedSections: sections.length,
+          totalSlides: slides.length,
+          capturedSlides: 0,
+          failedSlides: slides.length,
           duration,
         },
       };

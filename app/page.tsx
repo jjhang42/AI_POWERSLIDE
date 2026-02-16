@@ -24,7 +24,6 @@ import { HistoryPanel } from "@/components/HistoryPanel";
 import { EditProvider } from "@/lib/contexts/EditContext";
 import { UnifiedToolbar } from "@/components/UnifiedToolbar";
 import { CompactNavigator } from "@/components/CompactNavigator";
-import { TemplatesSidebar } from "@/components/TemplatesSidebar";
 
 // AIHelpers 로드 (window.aiHelpers로 노출됨)
 import "@/lib/ai-helpers";
@@ -36,7 +35,6 @@ export default function Home() {
   const [isInspectorOpen, setIsInspectorOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isTemplatesOpen, setIsTemplatesOpen] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [isPresentMode, setIsPresentMode] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
@@ -413,7 +411,7 @@ export default function Home() {
                 slides={slides}
                 currentSlideIndex={currentSlideIndex}
                 onSelectSlide={handleSelectSlide}
-                onOpenTemplates={() => setIsTemplatesOpen(true)}
+                onAddSlide={handleAddSlide}
                 onOpenSettings={() => setIsSettingsOpen(true)}
                 onOpenShortcuts={() => setShowShortcuts(true)}
                 onDeleteSlide={handleDeleteSlide}
@@ -607,24 +605,6 @@ export default function Home() {
             setShowHistoryPanel(false);
           }}
           lastActionDescription={lastActionDescription}
-        />
-
-        {/* Templates Sidebar */}
-        <TemplatesSidebar
-          slides={slides}
-          currentSlideIndex={currentSlideIndex}
-          onAddSlide={handleAddSlide}
-          onSelectSlide={handleSelectSlide}
-          onDeleteSlide={handleDeleteSlide}
-          onDuplicateSlide={handleDuplicateSlide}
-          onReorderSlides={(fromIndex, toIndex) => {
-            reorderSlides(fromIndex, toIndex);
-            setCurrentSlideIndex(toIndex);
-          }}
-          onOpenInspector={() => setIsInspectorOpen(true)}
-          onOpenEditor={setEditingSlideIndex}
-          isOpen={isTemplatesOpen}
-          onToggle={setIsTemplatesOpen}
         />
       </>
     </EditProvider>

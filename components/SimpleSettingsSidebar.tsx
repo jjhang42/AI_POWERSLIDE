@@ -84,22 +84,25 @@ export function SimpleSettingsSidebar({
   return (
     <>
       {/* 설정 버튼 */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="fixed top-6 right-6 z-[150]"
-      >
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setIsOpen(true)}
-          className="rounded-full px-4 py-2 bg-card/80 backdrop-blur-md border border-border shadow-lg hover:bg-card/90 transition-all"
+      {!isOpen && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.5 }}
+          className="fixed top-6 right-6 z-40"
         >
-          <Settings className="w-4 h-4 mr-2" />
-          <span className="text-sm font-medium">Setting</span>
-        </Button>
-      </motion.div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsOpen(true)}
+            className="rounded-full px-4 py-2 bg-card/80 backdrop-blur-md border border-border shadow-lg hover:bg-card/90 transition-all"
+          >
+            <Settings className="w-4 h-4 mr-2" />
+            <span className="text-sm font-medium">Setting</span>
+          </Button>
+        </motion.div>
+      )}
 
       {/* 배경 오버레이 */}
       <AnimatePresence>
@@ -109,7 +112,7 @@ export function SimpleSettingsSidebar({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsOpen(false)}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[125]"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
           />
         )}
       </AnimatePresence>
@@ -122,7 +125,7 @@ export function SimpleSettingsSidebar({
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="fixed right-0 top-0 h-full w-full max-w-md bg-card border-l border-border shadow-2xl z-[130] overflow-y-auto"
+            className="fixed right-0 top-0 h-full w-full max-w-md bg-card border-l border-border shadow-2xl z-50 overflow-y-auto"
           >
             {/* 헤더 */}
             <div className="sticky top-0 bg-card/95 backdrop-blur-md border-b border-border p-6 flex items-center justify-between z-10">

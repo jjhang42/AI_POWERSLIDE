@@ -1,0 +1,341 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ========== UI Tools Color System ========== */
+    /* Primary: Classic Blue (신뢰감, UI 도구용) */
+    --primary: 220 85% 58%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary: Slate Gray (중립적) */
+    --secondary: 220 15% 25%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Accent: Bright Blue (강조) */
+    --accent: 215 95% 65%;
+    --accent-foreground: 220 20% 10%;
+
+    /* Success: Professional Green */
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+
+    /* Background: Clean White */
+    --background: 0 0% 100%;
+    --foreground: 220 15% 10%;
+
+    /* Card */
+    --card: 0 0% 100%;
+    --card-foreground: 220 15% 10%;
+
+    /* Popover */
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 15% 10%;
+
+    /* Muted: Soft Gray */
+    --muted: 220 10% 95%;
+    --muted-foreground: 220 10% 45%;
+
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Border & Input */
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 220 85% 58%;
+
+    /* Radius */
+    --radius: 0.75rem;
+
+    /* ========== Slide Content Colors (슬라이드용) ========== */
+    /* 슬라이드별로 커스터마이징 가능 */
+    --slide-primary: 220 85% 58%;      /* 기본: 클래식 블루 */
+    --slide-secondary: 220 15% 25%;
+    --slide-accent: 215 95% 65%;
+
+    /* Data Visualization */
+    --chart-1: 220 85% 58%;   /* Blue */
+    --chart-2: 142 71% 45%;   /* Green */
+    --chart-3: 45 95% 55%;    /* Yellow */
+    --chart-4: 280 70% 60%;   /* Purple */
+    --chart-5: 0 84% 60%;     /* Red */
+  }
+
+  .dark {
+    /* Primary: Bright Classic Blue */
+    --primary: 220 90% 65%;
+    --primary-foreground: 220 20% 10%;
+
+    /* Secondary: Dark Slate */
+    --secondary: 220 15% 75%;
+    --secondary-foreground: 220 20% 10%;
+
+    /* Accent: Bright Blue */
+    --accent: 215 95% 70%;
+    --accent-foreground: 220 20% 10%;
+
+    /* Success */
+    --success: 142 71% 55%;
+    --success-foreground: 220 20% 10%;
+
+    /* Background: Deep Navy */
+    --background: 220 20% 8%;
+    --foreground: 220 10% 98%;
+
+    /* Card: Elevated Surface */
+    --card: 220 18% 12%;
+    --card-foreground: 220 10% 98%;
+
+    /* Popover */
+    --popover: 220 18% 12%;
+    --popover-foreground: 220 10% 98%;
+
+    /* Muted: Dark Slate */
+    --muted: 220 15% 20%;
+    --muted-foreground: 220 10% 65%;
+
+    /* Destructive */
+    --destructive: 0 70% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Border & Input */
+    --border: 220 15% 22%;
+    --input: 220 15% 22%;
+    --ring: 220 90% 65%;
+
+    /* Slide Content Colors (다크 모드) */
+    --slide-primary: 220 90% 65%;
+    --slide-secondary: 220 15% 75%;
+    --slide-accent: 215 95% 70%;
+
+    /* Data Visualization (다크 모드) */
+    --chart-1: 220 90% 65%;  /* Bright Blue */
+    --chart-2: 142 71% 55%;  /* Green */
+    --chart-3: 45 95% 60%;   /* Yellow */
+    --chart-4: 280 70% 65%;  /* Purple */
+    --chart-5: 0 84% 65%;    /* Red */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-background;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/30 rounded-lg;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/50;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  @apply font-bold tracking-tight;
+}
+
+h1 {
+  @apply text-5xl md:text-6xl lg:text-7xl;
+}
+
+h2 {
+  @apply text-4xl md:text-5xl lg:text-6xl;
+}
+
+h3 {
+  @apply text-3xl md:text-4xl;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* 풀페이지 스크롤: 메인 스크롤바 숨기기 (선택 사항) */
+main::-webkit-scrollbar {
+  display: none;
+}
+
+main {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* ========== Apple × Palantir Typography System ========== */
+@layer utilities {
+  .text-hero {
+    font-size: clamp(4rem, 12vw, 10rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+  }
+
+  .text-display-1 {
+    font-size: clamp(3rem, 8vw, 6rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+
+  .text-display-2 {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+
+  .text-headline {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  .text-body-large {
+    font-size: clamp(1.25rem, 2vw, 1.5rem);
+    font-weight: 400;
+    line-height: 1.6;
+    letter-spacing: 0;
+  }
+
+  .text-caption {
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .text-data-large {
+    font-family: ui-monospace, 'SF Mono', 'Roboto Mono', monospace;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .text-data {
+    font-family: ui-monospace, 'SF Mono', 'Roboto Mono', monospace;
+    font-size: 1.125rem;
+    font-weight: 500;
+    line-height: 1.4;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Apple-style Letter Spacing */
+  .tracking-apple-tight {
+    letter-spacing: -0.03em;
+  }
+
+  .tracking-apple-normal {
+    letter-spacing: -0.01em;
+  }
+
+  /* Font Rendering Optimization */
+  .text-rendering-optimized {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Enhanced antialiasing for large text */
+  .antialiased-strong {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: geometricPrecision;
+  }
+}
+
+/* Container Sizes */
+@layer components {
+  .container-tight {
+    max-width: 768px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .container-normal {
+    max-width: 1024px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .container-wide {
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .container-full {
+    max-width: 1536px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* Section backgrounds */
+@layer utilities {
+  .section-bg-pattern {
+    background: repeating-linear-gradient(
+      45deg,
+      rgba(0, 0, 0, 0.05),
+      rgba(0, 0, 0, 0.05) 10px,
+      rgba(0, 0, 0, 0.08) 10px,
+      rgba(0, 0, 0, 0.08) 20px
+    );
+  }
+
+  .section-bg-pattern-light {
+    background: repeating-linear-gradient(
+      45deg,
+      rgba(0, 0, 0, 0.02),
+      rgba(0, 0, 0, 0.02) 10px,
+      rgba(0, 0, 0, 0.04) 10px,
+      rgba(0, 0, 0, 0.04) 20px
+    );
+  }
+
+  .section-bg-pattern-dark {
+    background: repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.05),
+      rgba(255, 255, 255, 0.05) 10px,
+      rgba(255, 255, 255, 0.08) 10px,
+      rgba(255, 255, 255, 0.08) 20px
+    );
+  }
+}

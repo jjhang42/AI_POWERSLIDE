@@ -1,0 +1,15 @@
+[
+  {
+    "id": "blank-slide",
+    "title": "Blank Slide",
+    "order": 0,
+    "editableFields": {
+      "title": {
+        "type": "text",
+        "value": "Click to edit",
+        "label": "Title"
+      }
+    },
+    "code": "function BlankSlide({ title }) {\n  return (\n    <div className=\"w-full h-full flex items-center justify-center bg-background\">\n      <h1 className=\"text-6xl font-bold text-foreground\">{title}</h1>\n    </div>\n  );\n}"
+  }
+]

@@ -45,12 +45,12 @@ export function SimpleSettingsSidebar({
   const handleExport = async (format: "jpg" | "pdf" | "pptx") => {
     const slides = getSlideElements();
     if (slides.length === 0) {
-      alert("슬라이드를 찾을 수 없습니다.");
+      alert("No slides found to export.");
       return;
     }
 
     setIsExporting(true);
-    setExportProgress(`${format.toUpperCase()} 내보내기 중...`);
+    setExportProgress(`Exporting ${format.toUpperCase()}...`);
 
     try {
       const fileName = "iil-presentation";
@@ -70,11 +70,11 @@ export function SimpleSettingsSidebar({
           break;
       }
 
-      setExportProgress("완료!");
+      setExportProgress("Complete!");
       setTimeout(() => setExportProgress(""), 2000);
     } catch (error) {
       console.error(`Export failed:`, error);
-      alert(`내보내기 실패: ${error instanceof Error ? error.message : "Unknown error"}`);
+      alert(`Export failed: ${error instanceof Error ? error.message : "Unknown error"}`);
       setExportProgress("");
     } finally {
       setIsExporting(false);
@@ -97,7 +97,7 @@ export function SimpleSettingsSidebar({
           className="rounded-full px-4 py-2 bg-card/80 backdrop-blur-md border border-border shadow-lg hover:bg-card/90 transition-all"
         >
           <Settings className="w-4 h-4 mr-2" />
-          <span className="text-sm font-medium">설정</span>
+          <span className="text-sm font-medium">Setting</span>
         </Button>
       </motion.div>
 
@@ -128,7 +128,7 @@ export function SimpleSettingsSidebar({
             <div className="sticky top-0 bg-card/95 backdrop-blur-md border-b border-border p-6 flex items-center justify-between z-10">
               <div className="flex items-center gap-2">
                 <Settings className="w-5 h-5 text-primary" />
-                <h2 className="text-xl font-bold">설정</h2>
+                <h2 className="text-xl font-bold">Settings</h2>
               </div>
               <Button
                 variant="ghost"
@@ -142,18 +142,18 @@ export function SimpleSettingsSidebar({
 
             {/* 컨텐츠 */}
             <div className="p-6 space-y-8">
-              {/* 화면 비율 설정 */}
+              {/* Aspect Ratio */}
               <div>
-                <h3 className="text-sm font-semibold text-foreground mb-3">화면 비율</h3>
+                <h3 className="text-sm font-semibold text-foreground mb-3">Aspect Ratio</h3>
                 <AspectRatioSelector value={aspectRatio} onChange={onAspectRatioChange} />
               </div>
 
               {/* 구분선 */}
               <div className="border-t border-border" />
 
-              {/* 전체 화면 */}
+              {/* Display Mode */}
               <div>
-                <h3 className="text-sm font-semibold text-foreground mb-3">화면 모드</h3>
+                <h3 className="text-sm font-semibold text-foreground mb-3">Display Mode</h3>
                 <Button
                   onClick={toggleFullscreen}
                   variant={isFullscreen ? "default" : "outline"}
@@ -162,26 +162,26 @@ export function SimpleSettingsSidebar({
                   {isFullscreen ? (
                     <>
                       <Minimize className="w-4 h-4 mr-2" />
-                      전체 화면 해제
+                      Exit Fullscreen
                     </>
                   ) : (
                     <>
                       <Maximize className="w-4 h-4 mr-2" />
-                      전체 화면
+                      Enter Fullscreen
                     </>
                   )}
                 </Button>
                 <p className="text-xs text-muted-foreground mt-2">
-                  {isFullscreen ? "전체 화면 모드가 활성화되었습니다." : "프레젠테이션을 전체 화면으로 표시합니다."}
+                  {isFullscreen ? "Fullscreen mode is active." : "Display presentation in fullscreen."}
                 </p>
               </div>
 
               {/* 구분선 */}
               <div className="border-t border-border" />
 
-              {/* 내보내기 */}
+              {/* Export */}
               <div>
-                <h3 className="text-sm font-semibold text-foreground mb-3">내보내기</h3>
+                <h3 className="text-sm font-semibold text-foreground mb-3">Export</h3>
                 <div className="space-y-2">
                   <Button
                     variant="outline"
@@ -194,7 +194,7 @@ export function SimpleSettingsSidebar({
                     ) : (
                       <FileImage className="w-4 h-4 mr-2" />
                     )}
-                    JPG로 내보내기
+                    Export as JPG
                   </Button>
                   <Button
                     variant="outline"
@@ -207,7 +207,7 @@ export function SimpleSettingsSidebar({
                     ) : (
                       <FileText className="w-4 h-4 mr-2" />
                     )}
-                    PDF로 내보내기
+                    Export as PDF
                   </Button>
                   <Button
                     variant="outline"
@@ -220,7 +220,7 @@ export function SimpleSettingsSidebar({
                     ) : (
                       <Presentation className="w-4 h-4 mr-2" />
                     )}
-                    PowerPoint로 내보내기
+                    Export as PowerPoint
                   </Button>
                   {exportProgress && (
                     <p className="text-xs text-muted-foreground mt-2 text-center">
@@ -229,7 +229,7 @@ export function SimpleSettingsSidebar({
                   )}
                   {!exportProgress && (
                     <p className="text-xs text-muted-foreground mt-2">
-                      슬라이드를 JPG, PDF, PowerPoint 형식으로 내보낼 수 있습니다.
+                      Export your slides as JPG, PDF, or PowerPoint format.
                     </p>
                   )}
                 </div>

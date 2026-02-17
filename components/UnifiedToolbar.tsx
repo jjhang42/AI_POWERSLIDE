@@ -141,7 +141,6 @@ export function UnifiedToolbar({
                   title="Aspect Ratio"
                 >
                   <Monitor className="w-4 h-4" />
-                  <span className="text-xs font-mono">{aspectRatio}</span>
                   <ChevronDown className="w-3 h-3" />
                 </Button>
               </DropdownMenuTrigger>

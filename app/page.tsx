@@ -449,6 +449,7 @@ export default function Home() {
                 onAspectRatioChange={setAspectRatio}
                 lastSaved={lastSaved}
                 isSaving={isSaving}
+                onStartPresent={handleStartPresent}
               />
             </>
           )}

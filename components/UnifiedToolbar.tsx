@@ -15,6 +15,7 @@ import {
   Plus,
   Monitor,
   ChevronDown,
+  Maximize2,
 } from "lucide-react";
 import { useEdit } from "@/lib/contexts/EditContext";
 import { AutoSaveIndicator } from "./AutoSaveIndicator";
@@ -24,6 +25,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -58,6 +60,9 @@ interface UnifiedToolbarProps {
   // Status
   lastSaved?: Date;
   isSaving: boolean;
+
+  // Present Mode
+  onStartPresent: () => void;
 }
 
 export function UnifiedToolbar({
@@ -82,6 +87,7 @@ export function UnifiedToolbar({
   onAspectRatioChange,
   lastSaved,
   isSaving,
+  onStartPresent,
 }: UnifiedToolbarProps) {
   const { isEditMode, toggleEditMode } = useEdit();
   const [mounted, setMounted] = useState(false);
@@ -136,6 +142,11 @@ export function UnifiedToolbar({
                 <DropdownMenuItem onClick={() => onAspectRatioChange("4:3")}>
                   <Monitor className="w-4 h-4 mr-2" />
                   4:3 (1600×1200)
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={onStartPresent}>
+                  <Maximize2 className="w-4 h-4 mr-2" />
+                  전체화면 발표
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

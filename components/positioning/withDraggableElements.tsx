@@ -69,7 +69,7 @@ export function withDraggableElements<P extends object>(
       const position = positions[key] || { x: 0, y: 0 };
 
       if (type === 'text') {
-        // For text props, wrap with EditableText inside DraggableElement
+        // Keynote-style: DraggableElement handles click-to-select/drag, EditableText handles double-click-to-edit
         return (
           <DraggableElement
             key={key}
@@ -77,17 +77,15 @@ export function withDraggableElements<P extends object>(
             onPositionChange={(pos) => handlePositionChange(key, pos)}
             isSelected={selectedElementId === key}
             onSelect={() => onSelectElement?.(key)}
-            disabled={!isPositioningEnabled}
           >
             <EditableText
               value={value}
               onChange={(newValue) => onUpdate?.({ [key]: newValue })}
-              disabled={isPositioningEnabled}
+              disabled={false}
             />
           </DraggableElement>
         );
       } else if (type === 'custom') {
-        // For custom elements (images, complex components), just wrap with DraggableElement
         return (
           <DraggableElement
             key={key}
@@ -95,7 +93,6 @@ export function withDraggableElements<P extends object>(
             onPositionChange={(pos) => handlePositionChange(key, pos)}
             isSelected={selectedElementId === key}
             onSelect={() => onSelectElement?.(key)}
-            disabled={!isPositioningEnabled}
           >
             {value}
           </DraggableElement>

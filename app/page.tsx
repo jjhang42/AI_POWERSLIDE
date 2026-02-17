@@ -38,7 +38,6 @@ export default function Home() {
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [transitionType, setTransitionType] = useState<TransitionType>("fade");
   const [slideDirection, setSlideDirection] = useState(1);
-  const [isPositioningEnabled, setIsPositioningEnabled] = useState(false);
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   const [editingSlideIndex, setEditingSlideIndex] = useState<number | null>(null);
   const [showGrid, setShowGrid] = useState(false);
@@ -318,11 +317,6 @@ export default function Home() {
         return;
       }
 
-      // Don't handle arrow keys if positioning mode is enabled
-      if (isPositioningEnabled && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
-        return;
-      }
-
       switch (e.key) {
         case "ArrowRight":
         case "ArrowDown":
@@ -355,7 +349,7 @@ export default function Home() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [slides.length, currentSlideIndex, isPositioningEnabled]);
+  }, [slides.length, currentSlideIndex]);
 
   // Render current slide
   const renderSlide = () => {
@@ -406,7 +400,7 @@ export default function Home() {
       <TemplateComponent
         {...props}
         onUpdate={handleUpdate}
-        isPositioningEnabled={isPositioningEnabled}
+        isPositioningEnabled={true}
         selectedElementId={selectedElementId}
         onSelectElement={setSelectedElementId}
       />
@@ -455,11 +449,6 @@ export default function Home() {
                 onOpenHistory={() => setShowHistoryPanel(true)}
                 currentSlideIndex={currentSlideIndex}
                 totalSlides={slides.length}
-                isPositioningEnabled={isPositioningEnabled}
-                onTogglePositioning={() => {
-                  setIsPositioningEnabled(!isPositioningEnabled);
-                  setSelectedElementId(null);
-                }}
                 showGrid={showGrid}
                 onToggleGrid={() => setShowGrid(!showGrid)}
                 onOpenTransitions={() => setShowTransitionsModal(true)}

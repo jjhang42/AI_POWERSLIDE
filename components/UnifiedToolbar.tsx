@@ -6,7 +6,6 @@ import {
   Undo2,
   Redo2,
   History,
-  Move,
   Grid3x3,
   Wand2,
   Minus,
@@ -43,8 +42,6 @@ interface UnifiedToolbarProps {
   // Context
   currentSlideIndex: number;
   totalSlides: number;
-  isPositioningEnabled: boolean;
-  onTogglePositioning: () => void;
 
   // View Controls
   showGrid: boolean;
@@ -80,8 +77,6 @@ export function UnifiedToolbar({
   onOpenHistory,
   currentSlideIndex,
   totalSlides,
-  isPositioningEnabled,
-  onTogglePositioning,
   showGrid,
   onToggleGrid,
   onOpenTransitions,
@@ -180,18 +175,6 @@ export function UnifiedToolbar({
               <History className="w-4 h-4" />
             </Button>
 
-            {/* Position Manager */}
-            <div className="w-px h-6 bg-border mx-2" />
-            <Button
-              variant={isPositioningEnabled ? "default" : "ghost"}
-              size="sm"
-              onClick={onTogglePositioning}
-              className="h-8 px-3 rounded-md"
-              title="Position Mode"
-            >
-              <Move className="w-4 h-4 mr-2" />
-              <span className="text-sm">Position</span>
-            </Button>
 
             {/* View Controls */}
             <div className="w-px h-6 bg-border mx-2" />

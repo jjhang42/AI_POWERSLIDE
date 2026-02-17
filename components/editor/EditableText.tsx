@@ -43,8 +43,9 @@ export function EditableText({
     }
   }, [isEditing]);
 
-  const handleClick = () => {
-    if (!disabled && isEditMode) {
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // DraggableElement의 mousedown과 충돌 방지
+    if (!disabled) {
       setIsEditing(true);
     }
   };
@@ -80,34 +81,28 @@ export function EditableText({
   if (!isEditing) {
     return (
       <motion.div
-        onClick={handleClick}
-        onMouseEnter={() => isEditMode && setIsHovered(true)}
+        onDoubleClick={handleDoubleClick}
+        onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         className={cn(
           "relative rounded-md transition-all duration-200",
-          isEditMode && [
-            "cursor-text",
-            "hover:bg-blue-50/50 dark:hover:bg-blue-950/20",
-            "hover:ring-1 hover:ring-blue-200 dark:hover:ring-blue-800",
-            "hover:shadow-sm hover:shadow-blue-100 dark:hover:shadow-blue-900/30",
-          ],
-          !isEditMode && "cursor-default",
+          !disabled && "hover:bg-blue-50/50 dark:hover:bg-blue-950/20",
+          !disabled && "hover:ring-1 hover:ring-blue-200 dark:hover:ring-blue-800",
           className
         )}
-        whileHover={isEditMode ? { scale: 1.005 } : {}}
-        transition={{ type: "tween", ease: [0.25, 0.1, 0.25, 1], duration: 0.15 }}
+        title={!disabled ? "더블클릭하여 편집" : undefined}
       >
         {value || <span className="text-muted-foreground">{placeholder}</span>}
 
-        {/* Subtle edit icon on hover - only in edit mode */}
+        {/* 호버 시 편집 힌트 아이콘 */}
         <AnimatePresence>
-          {isEditMode && isHovered && !isEditing && (
+          {!disabled && isHovered && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
-              animate={{ opacity: 1, scale: 1, rotate: 0 }}
-              exit={{ opacity: 0, scale: 0.8, rotate: 10 }}
-              transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-              className="absolute -right-3 -top-3 p-1.5 bg-blue-500 text-white rounded-full shadow-lg shadow-blue-500/30 border border-blue-400"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.15 }}
+              className="absolute -right-3 -top-3 p-1.5 bg-blue-500 text-white rounded-full shadow-lg shadow-blue-500/30 border border-blue-400 pointer-events-none"
             >
               <Pencil className="w-3 h-3" />
             </motion.div>

@@ -23,7 +23,6 @@ interface DraggableElementProps {
   onPositionChange?: (position: Position) => void;
   isSelected?: boolean;
   onSelect?: () => void;
-  disabled?: boolean;
   className?: string;
 }
 
@@ -33,45 +32,28 @@ export function DraggableElement({
   onPositionChange,
   isSelected = false,
   onSelect,
-  disabled = false,
   className = "",
 }: DraggableElementProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const elementRef = useRef<HTMLDivElement>(null);
 
-  // Handle keyboard movement
+  // Keynote-style: arrow key movement when selected
   useEffect(() => {
-    if (!isSelected || disabled) return;
+    if (!isSelected) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't handle if user is typing in an input
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        return;
-      }
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 
       const step = e.shiftKey ? 10 : 1;
       const newPosition = { ...position };
 
       switch (e.key) {
-        case "ArrowUp":
-          e.preventDefault();
-          newPosition.y = (position.y || 0) - step;
-          break;
-        case "ArrowDown":
-          e.preventDefault();
-          newPosition.y = (position.y || 0) + step;
-          break;
-        case "ArrowLeft":
-          e.preventDefault();
-          newPosition.x = (position.x || 0) - step;
-          break;
-        case "ArrowRight":
-          e.preventDefault();
-          newPosition.x = (position.x || 0) + step;
-          break;
-        default:
-          return;
+        case "ArrowUp":    e.preventDefault(); newPosition.y = (position.y || 0) - step; break;
+        case "ArrowDown":  e.preventDefault(); newPosition.y = (position.y || 0) + step; break;
+        case "ArrowLeft":  e.preventDefault(); newPosition.x = (position.x || 0) - step; break;
+        case "ArrowRight": e.preventDefault(); newPosition.x = (position.x || 0) + step; break;
+        default: return;
       }
 
       onPositionChange?.(newPosition);
@@ -79,40 +61,41 @@ export function DraggableElement({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isSelected, disabled]);
+  }, [isSelected, position, onPositionChange]);
 
-  // Handle mouse drag
+  // Keynote-style: 1클릭 = 선택, 선택 상태에서 드래그 = 이동
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (disabled) return;
-
     e.stopPropagation();
+
+    if (!isSelected) {
+      // 첫 클릭은 선택만
+      onSelect?.();
+      return;
+    }
+
+    // 이미 선택된 상태에서 드래그
     setIsDragging(true);
     setDragStart({
       x: e.clientX - (position.x || 0),
       y: e.clientY - (position.y || 0),
     });
-    onSelect?.();
   };
 
   useEffect(() => {
     if (!isDragging) return;
 
     const handleMouseMove = (e: MouseEvent) => {
-      const newPosition = {
+      onPositionChange?.({
         ...position,
         x: e.clientX - dragStart.x,
         y: e.clientY - dragStart.y,
-      };
-      onPositionChange?.(newPosition);
+      });
     };
 
-    const handleMouseUp = () => {
-      setIsDragging(false);
-    };
+    const handleMouseUp = () => setIsDragging(false);
 
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseup", handleMouseUp);
-
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
@@ -124,8 +107,7 @@ export function DraggableElement({
       ref={elementRef}
       onMouseDown={handleMouseDown}
       className={`
-        ${disabled ? "" : "cursor-move"}
-        ${isSelected ? "ring-2 ring-blue-500 ring-offset-2" : ""}
+        ${isSelected ? "cursor-move ring-2 ring-blue-500 ring-offset-2" : "cursor-default"}
         ${className}
       `}
       style={{
@@ -136,8 +118,8 @@ export function DraggableElement({
     >
       {children}
 
-      {/* Selection indicator */}
-      {isSelected && !disabled && (
+      {/* 선택된 요소의 좌표 표시 */}
+      {isSelected && (
         <div className="absolute -top-8 left-0 px-2 py-1 bg-blue-500 text-white text-xs rounded pointer-events-none">
           x: {Math.round(position.x || 0)}, y: {Math.round(position.y || 0)}
           {position.rotation !== 0 && ` ∠${Math.round(position.rotation || 0)}°`}

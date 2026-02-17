@@ -23,6 +23,7 @@ import { HistoryPanel } from "@/components/HistoryPanel";
 import { EditProvider } from "@/lib/contexts/EditContext";
 import { UnifiedToolbar } from "@/components/UnifiedToolbar";
 import { CompactNavigator } from "@/components/CompactNavigator";
+import { SlideCodePanel } from "@/components/SlideCodePanel";
 
 // AIHelpers 로드 (window.aiHelpers로 노출됨)
 import "@/lib/ai-helpers";
@@ -572,6 +573,14 @@ export default function Home() {
               return <TemplateComponent {...props} onUpdate={handleUpdate} />;
             }}
           />
+
+          {/* Slide Code Panel */}
+          {isLoaded && slides.length > 0 && !isPresentMode && !isFullscreen && (
+            <SlideCodePanel
+              slide={slides[currentSlideIndex] || null}
+              onUpdate={(newProps) => updateSlideProps(currentSlideIndex, newProps)}
+            />
+          )}
 
           {/* Keyboard Shortcuts Help */}
           <KeyboardShortcutsHelp isOpen={showShortcuts} onOpenChange={setShowShortcuts} />

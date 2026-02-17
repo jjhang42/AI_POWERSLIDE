@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState } from "react"; // isExporting, exportProgress 상태용
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { Settings, X, Maximize, Minimize, Download, FileImage, FileText, Presentation, Loader2 } from "lucide-react";
@@ -11,6 +11,8 @@ interface SimpleSettingsSidebarProps {
   onAspectRatioChange: (ratio: AspectRatio) => void;
   isFullscreen: boolean;
   onFullscreenChange: (fullscreen: boolean) => void;
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 export function SimpleSettingsSidebar({
@@ -18,8 +20,9 @@ export function SimpleSettingsSidebar({
   onAspectRatioChange,
   isFullscreen,
   onFullscreenChange,
+  isOpen,
+  onOpenChange,
 }: SimpleSettingsSidebarProps) {
-  const [isOpen, setIsOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState("");
 
@@ -99,7 +102,7 @@ export function SimpleSettingsSidebar({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setIsOpen(true)}
+            onClick={() => onOpenChange(true)}
             className="rounded-full px-4 py-2 bg-card/80 backdrop-blur-md border border-border shadow-lg hover:bg-card/90 transition-all"
           >
             <Settings className="w-4 h-4 mr-2" />
@@ -115,7 +118,7 @@ export function SimpleSettingsSidebar({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setIsOpen(false)}
+            onClick={() => onOpenChange(false)}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
           />
         )}
@@ -140,7 +143,7 @@ export function SimpleSettingsSidebar({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setIsOpen(false)}
+                onClick={() => onOpenChange(false)}
                 className="rounded-full w-9 h-9 p-0"
               >
                 <X className="w-5 h-5" />

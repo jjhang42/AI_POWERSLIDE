@@ -502,6 +502,8 @@ export default function Home() {
             onAspectRatioChange={setAspectRatio}
             isFullscreen={isFullscreen}
             onFullscreenChange={setIsFullscreen}
+            isOpen={isSettingsOpen}
+            onOpenChange={setIsSettingsOpen}
           />
 
           {/* Floating Inspector */}

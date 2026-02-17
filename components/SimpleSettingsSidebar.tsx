@@ -1,14 +1,10 @@
 "use client";
 
-import { useState } from "react"; // isExporting, exportProgress 상태용
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { Settings, X, Maximize, Minimize, Download, FileImage, FileText, Presentation, Loader2 } from "lucide-react";
-import { AspectRatioSelector, AspectRatio } from "./AspectRatioSelector";
+import { Settings, X, Maximize, Minimize } from "lucide-react";
 
 interface SimpleSettingsSidebarProps {
-  aspectRatio: AspectRatio;
-  onAspectRatioChange: (ratio: AspectRatio) => void;
   isFullscreen: boolean;
   onFullscreenChange: (fullscreen: boolean) => void;
   isOpen: boolean;
@@ -16,16 +12,11 @@ interface SimpleSettingsSidebarProps {
 }
 
 export function SimpleSettingsSidebar({
-  aspectRatio,
-  onAspectRatioChange,
   isFullscreen,
   onFullscreenChange,
   isOpen,
   onOpenChange,
 }: SimpleSettingsSidebarProps) {
-  const [isExporting, setIsExporting] = useState(false);
-  const [exportProgress, setExportProgress] = useState("");
-
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen();
@@ -36,61 +27,9 @@ export function SimpleSettingsSidebar({
     }
   };
 
-  const getSlideElements = (): HTMLElement[] => {
-    // SlideCanvas 내부의 슬라이드 컨텐츠 찾기
-    const slideContent = document.querySelector("[data-slide-content='true']");
-
-    if (slideContent) {
-      // 슬라이드 컨텐츠 자체를 반환 (자식이 아니라 컨테이너 전체)
-      return [slideContent as HTMLElement];
-    }
-
-    return [];
-  };
-
-  const handleExport = async (format: "jpg" | "pdf" | "pptx") => {
-    const slides = getSlideElements();
-
-    if (slides.length === 0) {
-      alert("No slides found to export.");
-      return;
-    }
-
-    setIsExporting(true);
-    setExportProgress(`Exporting ${format.toUpperCase()}...`);
-
-    try {
-      const fileName = "iil-presentation";
-
-      // Dynamic import로 브라우저 호환성 확보
-      const exportModule = await import("@/lib/export");
-
-      switch (format) {
-        case "jpg":
-          await exportModule.exportToJpg(slides, fileName);
-          break;
-        case "pdf":
-          await exportModule.exportToPdf(slides, fileName);
-          break;
-        case "pptx":
-          await exportModule.exportToPptx(slides, fileName);
-          break;
-      }
-
-      setExportProgress("Complete!");
-      setTimeout(() => setExportProgress(""), 2000);
-    } catch (error) {
-      console.error(`Export failed:`, error);
-      alert(`Export failed: ${error instanceof Error ? error.message : "Unknown error"}`);
-      setExportProgress("");
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
   return (
     <>
-      {/* 설정 버튼 */}
+      {/* 설정 버튼 (슬라이드 없을 때만 우측 상단에 표시) */}
       {!isOpen && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -152,15 +91,6 @@ export function SimpleSettingsSidebar({
 
             {/* 컨텐츠 */}
             <div className="p-6 space-y-8">
-              {/* Aspect Ratio */}
-              <div>
-                <h3 className="text-sm font-semibold text-foreground mb-3">Aspect Ratio</h3>
-                <AspectRatioSelector value={aspectRatio} onChange={onAspectRatioChange} />
-              </div>
-
-              {/* 구분선 */}
-              <div className="border-t border-border" />
-
               {/* Display Mode */}
               <div>
                 <h3 className="text-sm font-semibold text-foreground mb-3">Display Mode</h3>
@@ -184,65 +114,6 @@ export function SimpleSettingsSidebar({
                 <p className="text-xs text-muted-foreground mt-2">
                   {isFullscreen ? "Fullscreen mode is active." : "Display presentation in fullscreen."}
                 </p>
-              </div>
-
-              {/* 구분선 */}
-              <div className="border-t border-border" />
-
-              {/* Export */}
-              <div>
-                <h3 className="text-sm font-semibold text-foreground mb-3">Export</h3>
-                <div className="space-y-2">
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => handleExport("jpg")}
-                    disabled={isExporting}
-                  >
-                    {isExporting ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ) : (
-                      <FileImage className="w-4 h-4 mr-2" />
-                    )}
-                    Export as JPG
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => handleExport("pdf")}
-                    disabled={isExporting}
-                  >
-                    {isExporting ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ) : (
-                      <FileText className="w-4 h-4 mr-2" />
-                    )}
-                    Export as PDF
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => handleExport("pptx")}
-                    disabled={isExporting}
-                  >
-                    {isExporting ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ) : (
-                      <Presentation className="w-4 h-4 mr-2" />
-                    )}
-                    Export as PowerPoint
-                  </Button>
-                  {exportProgress && (
-                    <p className="text-xs text-muted-foreground mt-2 text-center">
-                      {exportProgress}
-                    </p>
-                  )}
-                  {!exportProgress && (
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Export your slides as JPG, PDF, or PowerPoint format.
-                    </p>
-                  )}
-                </div>
               </div>
             </div>
           </motion.div>

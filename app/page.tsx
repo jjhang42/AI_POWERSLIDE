@@ -58,6 +58,32 @@ export default function Home() {
   // History panel state
   const [showHistoryPanel, setShowHistoryPanel] = useState(false);
 
+  // Export state
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = async (format: "jpg" | "pdf" | "pptx") => {
+    const slideContent = document.querySelector("[data-slide-content='true']") as HTMLElement | null;
+    if (!slideContent) {
+      alert("No slides found to export.");
+      return;
+    }
+    setIsExporting(true);
+    try {
+      const exportModule = await import("@/lib/export");
+      const fileName = "iil-presentation";
+      switch (format) {
+        case "jpg": await exportModule.exportToJpg([slideContent], fileName); break;
+        case "pdf": await exportModule.exportToPdf([slideContent], fileName); break;
+        case "pptx": await exportModule.exportToPptx([slideContent], fileName); break;
+      }
+    } catch (error) {
+      console.error(`Export failed:`, error);
+      alert(`Export failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   // useSlides 훅 사용
   const {
     slides,
@@ -450,6 +476,8 @@ export default function Home() {
                 lastSaved={lastSaved}
                 isSaving={isSaving}
                 onStartPresent={handleStartPresent}
+                onExport={handleExport}
+                isExporting={isExporting}
               />
             </>
           )}
@@ -498,8 +526,6 @@ export default function Home() {
 
           {/* Settings Sidebar (Modal) */}
           <SimpleSettingsSidebar
-            aspectRatio={aspectRatio}
-            onAspectRatioChange={setAspectRatio}
             isFullscreen={isFullscreen}
             onFullscreenChange={setIsFullscreen}
             isOpen={isSettingsOpen}

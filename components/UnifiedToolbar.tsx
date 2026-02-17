@@ -16,6 +16,11 @@ import {
   Monitor,
   ChevronDown,
   Maximize2,
+  Download,
+  FileImage,
+  FileText,
+  Presentation,
+  Loader2,
 } from "lucide-react";
 import { useEdit } from "@/lib/contexts/EditContext";
 import { AutoSaveIndicator } from "./AutoSaveIndicator";
@@ -63,6 +68,10 @@ interface UnifiedToolbarProps {
 
   // Present Mode
   onStartPresent: () => void;
+
+  // Export
+  onExport: (format: "jpg" | "pdf" | "pptx") => void;
+  isExporting: boolean;
 }
 
 export function UnifiedToolbar({
@@ -88,6 +97,8 @@ export function UnifiedToolbar({
   lastSaved,
   isSaving,
   onStartPresent,
+  onExport,
+  isExporting,
 }: UnifiedToolbarProps) {
   const { isEditMode, toggleEditMode } = useEdit();
   const [mounted, setMounted] = useState(false);
@@ -256,6 +267,42 @@ export function UnifiedToolbar({
                 <Plus className="w-3 h-3" />
               </Button>
             </div>
+
+            <div className="w-px h-6 bg-border" />
+
+            {/* Export */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2 rounded-md gap-1"
+                  title="Export"
+                  disabled={isExporting}
+                >
+                  {isExporting ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Download className="w-4 h-4" />
+                  )}
+                  <ChevronDown className="w-3 h-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => onExport("jpg")}>
+                  <FileImage className="w-4 h-4 mr-2" />
+                  JPG로 내보내기
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onExport("pdf")}>
+                  <FileText className="w-4 h-4 mr-2" />
+                  PDF로 내보내기
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onExport("pptx")}>
+                  <Presentation className="w-4 h-4 mr-2" />
+                  PowerPoint로 내보내기
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <div className="w-px h-6 bg-border" />
 

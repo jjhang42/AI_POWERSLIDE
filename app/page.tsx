@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SlideCanvas } from "@/components/SlideCanvas";
-import { SimpleSettingsSidebar } from "@/components/SimpleSettingsSidebar";
 import { AspectRatio } from "@/components/AspectRatioSelector";
 import {
   TEMPLATE_REGISTRY,
@@ -34,7 +33,6 @@ export default function Home() {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [isInspectorOpen, setIsInspectorOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [isPresentMode, setIsPresentMode] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
@@ -439,7 +437,6 @@ export default function Home() {
                 currentSlideIndex={currentSlideIndex}
                 onSelectSlide={handleSelectSlide}
                 onAddSlide={handleAddSlide}
-                onOpenSettings={() => setIsSettingsOpen(true)}
                 onOpenShortcuts={() => setShowShortcuts(true)}
                 onDeleteSlide={handleDeleteSlide}
                 onDuplicateSlide={handleDuplicateSlide}
@@ -525,12 +522,6 @@ export default function Home() {
           </div>
 
           {/* Settings Sidebar (Modal) */}
-          <SimpleSettingsSidebar
-            isFullscreen={isFullscreen}
-            onFullscreenChange={setIsFullscreen}
-            isOpen={isSettingsOpen}
-            onOpenChange={setIsSettingsOpen}
-          />
 
           {/* Floating Inspector */}
           <FloatingInspector

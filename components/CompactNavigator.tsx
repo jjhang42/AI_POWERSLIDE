@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Plus, Settings, Copy, Trash2, ArrowUp, ArrowDown, Keyboard, ChevronDown } from "lucide-react";
+import { Plus, Copy, Trash2, ArrowUp, ArrowDown, Keyboard, ChevronDown } from "lucide-react";
 import { SlideWithProps } from "@/lib/types/slides";
 import { TEMPLATE_REGISTRY, TEMPLATES, TemplateType } from "@/components/templates";
 import {
@@ -25,7 +25,6 @@ interface CompactNavigatorProps {
   currentSlideIndex: number;
   onSelectSlide: (index: number) => void;
   onAddSlide: (type: TemplateType) => void;
-  onOpenSettings: () => void;
   onOpenShortcuts: () => void;
   onDeleteSlide: (index: number) => void;
   onDuplicateSlide: (index: number) => void;
@@ -37,7 +36,6 @@ export function CompactNavigator({
   currentSlideIndex,
   onSelectSlide,
   onAddSlide,
-  onOpenSettings,
   onOpenShortcuts,
   onDeleteSlide,
   onDuplicateSlide,
@@ -219,15 +217,6 @@ export function CompactNavigator({
         >
           <Keyboard className="w-4 h-4" />
           <span className="text-sm">Shortcuts</span>
-        </Button>
-        <Button
-          onClick={onOpenSettings}
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start gap-2"
-        >
-          <Settings className="w-4 h-4" />
-          <span className="text-sm">Settings</span>
         </Button>
       </div>
     </div>

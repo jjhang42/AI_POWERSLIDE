@@ -18,7 +18,7 @@ export function GridGuides({ aspectRatio }: GridGuidesProps) {
   return (
     <>
       {/* Grid & Guides Overlay */}
-      <div className="fixed inset-0 pointer-events-none z-[45] flex items-center justify-center">
+      <div className="fixed top-0 left-[220px] right-0 bottom-0 pointer-events-none z-[45] flex items-center justify-center">
         <svg
           viewBox={`0 0 ${width} ${height}`}
           preserveAspectRatio="xMidYMid meet"

@@ -19,7 +19,7 @@ import {
 import { useEdit } from "@/lib/contexts/EditContext";
 import { AutoSaveIndicator } from "./AutoSaveIndicator";
 import { AspectRatio } from "./AspectRatioSelector";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -84,8 +84,11 @@ export function UnifiedToolbar({
   isSaving,
 }: UnifiedToolbarProps) {
   const { isEditMode, toggleEditMode } = useEdit();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
-  if (totalSlides === 0) return null;
+  // 마운트 전 또는 슬라이드 없을 때는 렌더링하지 않음 (SSR과 클라이언트 일치)
+  if (!mounted || totalSlides === 0) return null;
 
   return (
     <>

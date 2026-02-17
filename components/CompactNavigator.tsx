@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Plus, Settings, Copy, Trash2, ArrowUp, ArrowDown, Keyboard, ChevronDown } from "lucide-react";
@@ -42,6 +43,12 @@ export function CompactNavigator({
   onDuplicateSlide,
   onMoveSlide,
 }: CompactNavigatorProps) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  // SSR과 첫 클라이언트 렌더를 일치시키기 위해 마운트 전에는 빈 슬라이드로 처리
+  const displaySlides = mounted ? slides : [];
+
   return (
     <div className="fixed left-0 top-0 h-screen w-[220px] bg-background/80 backdrop-blur-2xl border-r border-border/50 shadow-2xl z-30 flex flex-col">
       {/* Header */}
@@ -92,7 +99,7 @@ export function CompactNavigator({
 
       {/* Slides List */}
       <div className="flex-1 overflow-y-auto p-2 space-y-2">
-        {slides.length === 0 ? (
+        {displaySlides.length === 0 ? (
           <div className="text-center py-8 px-4">
             <p className="text-sm text-muted-foreground">
               No slides yet
@@ -102,7 +109,7 @@ export function CompactNavigator({
             </p>
           </div>
         ) : (
-          slides.map((slide, index) => {
+          displaySlides.map((slide, index) => {
             const isActive = index === currentSlideIndex;
             const canMoveUp = index > 0;
             const canMoveDown = index < slides.length - 1;
@@ -110,9 +117,12 @@ export function CompactNavigator({
             return (
               <ContextMenu key={slide.id}>
                 <ContextMenuTrigger asChild>
-                  <motion.button
+                  <motion.div
                     onClick={() => onSelectSlide(index)}
-                    className={`w-full text-left p-2 rounded-lg transition-all ${
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => e.key === 'Enter' && onSelectSlide(index)}
+                    className={`w-full text-left p-2 rounded-lg transition-all cursor-pointer ${
                       isActive
                         ? "bg-primary/10 ring-2 ring-primary"
                         : "hover:bg-muted"
@@ -157,7 +167,7 @@ export function CompactNavigator({
                         </div>
                       </div>
                     </div>
-                  </motion.button>
+                  </motion.div>
                 </ContextMenuTrigger>
                 <ContextMenuContent className="w-48">
                   <ContextMenuItem

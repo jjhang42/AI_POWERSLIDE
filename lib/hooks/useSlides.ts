@@ -12,29 +12,29 @@ const getDefaultProps = (type: TemplateType): TemplateProps => {
   return TEMPLATE_REGISTRY[type]?.defaultProps;
 };
 
-// Get initial slides from localStorage
-// Note: This causes a hydration warning because server renders with []
-// but client renders with localStorage data. This is acceptable because
-// the client will immediately re-render with correct data.
-const getInitialSlides = (): SlideWithProps[] => {
-  if (typeof window === "undefined") return [];
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) return [];
-    return JSON.parse(saved);
-  } catch (e) {
-    console.error("Failed to load initial slides:", e);
-    return [];
-  }
-};
-
 export function useSlides() {
-  const history = useHistory<SlideWithProps[]>(getInitialSlides());
+  // 항상 빈 배열로 시작하여 SSR/클라이언트 hydration 불일치 방지
+  const history = useHistory<SlideWithProps[]>([]);
   const slides = history.state;
   const [lastSaved, setLastSaved] = useState<Date | undefined>(undefined);
   const [isSaving, setIsSaving] = useState(false);
   const [lastActionDescription, setLastActionDescription] = useState<string>("");
-  const [isLoaded, setIsLoaded] = useState(true);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // 클라이언트 마운트 후 localStorage에서 데이터 로드
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        history.set(parsed);
+      }
+    } catch (e) {
+      console.error("Failed to load slides from localStorage:", e);
+    }
+    setIsLoaded(true);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Listen for storage events (from aiHelpers or other tabs)
   useEffect(() => {
@@ -151,5 +151,6 @@ export function useSlides() {
     canRedo: history.canRedo,
     historyStates: history.history,
     currentHistoryIndex: history.currentIndex,
+    isLoaded,
   };
 }

@@ -76,6 +76,7 @@ export default function Home() {
     canRedo,
     historyStates,
     currentHistoryIndex,
+    isLoaded,
   } = useSlides();
 
   // Adjust currentSlideIndex when slides length changes
@@ -408,7 +409,7 @@ export default function Home() {
             <>
               {/* Compact Navigator - Fixed Left Sidebar */}
               <CompactNavigator
-                slides={slides}
+                slides={isLoaded ? slides : []}
                 currentSlideIndex={currentSlideIndex}
                 onSelectSlide={handleSelectSlide}
                 onAddSlide={handleAddSlide}
@@ -477,7 +478,7 @@ export default function Home() {
                 <SlideCanvas aspectRatio={aspectRatio} isFullscreen={isFullscreen}>
                   <AnimatePresence mode="wait" custom={slideDirection}>
                     <motion.div
-                      key={currentSlideIndex}
+                      key={isLoaded ? currentSlideIndex : 'loading'}
                       custom={slideDirection}
                       {...(transitionType !== "none"
                         ? typeof transitionVariants[transitionType] === "function"
@@ -486,7 +487,7 @@ export default function Home() {
                         : transitionVariants.none)}
                       className="w-full h-full"
                     >
-                      {renderSlide()}
+                      {isLoaded ? renderSlide() : null}
                     </motion.div>
                   </AnimatePresence>
                 </SlideCanvas>

@@ -1,26 +1,17 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { GripVertical, Copy, Trash2, Eye } from "lucide-react";
+import { GripVertical, Copy, Trash2, Eye, Pencil } from "lucide-react";
 import { SlideWithProps } from "@/lib/types/slides";
+import { TEMPLATE_REGISTRY } from "@/components/templates";
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
+  ContextMenuTrigger,
   ContextMenuSeparator,
   ContextMenuShortcut,
-  ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import {
-  TitleSlide,
-  SectionTitle,
-  ContentSlide,
-  TwoColumn,
-  BulletPoints,
-  QuoteSlide,
-  ImageWithCaption,
-  ThankYou,
-} from "@/components/templates";
 
 interface SlideCardProps {
   slide: SlideWithProps;
@@ -30,6 +21,7 @@ interface SlideCardProps {
   onDuplicate: () => void;
   onDelete: () => void;
   onInspector: () => void;
+  onEditor?: () => void;
   dragHandleProps?: any;
   isDragging?: boolean;
 }
@@ -42,33 +34,20 @@ export function SlideCard({
   onDuplicate,
   onDelete,
   onInspector,
+  onEditor,
   dragHandleProps,
   isDragging = false,
 }: SlideCardProps) {
   // Render mini preview of slide
   const renderMiniSlide = () => {
     const props = slide.props;
+    const TemplateComponent = TEMPLATE_REGISTRY[slide.type]?.component;
 
-    switch (slide.type) {
-      case "TitleSlide":
-        return <TitleSlide {...props} />;
-      case "SectionTitle":
-        return <SectionTitle {...props} />;
-      case "ContentSlide":
-        return <ContentSlide {...props} />;
-      case "TwoColumn":
-        return <TwoColumn {...props} />;
-      case "BulletPoints":
-        return <BulletPoints {...props} />;
-      case "QuoteSlide":
-        return <QuoteSlide {...props} />;
-      case "ImageWithCaption":
-        return <ImageWithCaption {...props} />;
-      case "ThankYou":
-        return <ThankYou {...props} />;
-      default:
-        return null;
+    if (!TemplateComponent) {
+      return null;
     }
+
+    return <TemplateComponent {...(props as any)} />;
   };
 
   return (
@@ -156,9 +135,15 @@ export function SlideCard({
       <ContextMenuContent className="w-56">
         <ContextMenuItem onClick={onInspector}>
           <Eye className="w-4 h-4 mr-2" />
-          Inspector
+          Quick Inspector
           <ContextMenuShortcut>⌘I</ContextMenuShortcut>
         </ContextMenuItem>
+        {onEditor && (
+          <ContextMenuItem onClick={onEditor}>
+            <Pencil className="w-4 h-4 mr-2" />
+            Edit Details
+          </ContextMenuItem>
+        )}
         <ContextMenuSeparator />
         <ContextMenuItem onClick={onDuplicate}>
           <Copy className="w-4 h-4 mr-2" />

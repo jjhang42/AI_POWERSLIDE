@@ -1,5 +1,13 @@
-import { TemplateType } from "@/components/TemplatesSidebar";
+import { TemplateType } from "@/components/templates/registry";
 import { ReactNode, CSSProperties } from "react";
+
+// 요소 위치 정보 (사용자가 GUI로 조정)
+export interface ElementPosition {
+  x: number;
+  y: number;
+  rotation?: number;
+  scale?: number;
+}
 
 // 공통 스타일 인터페이스 (모든 슬라이드에 적용 가능)
 export interface SlideStyleConfig {
@@ -7,6 +15,10 @@ export interface SlideStyleConfig {
   style?: CSSProperties;        // 인라인 스타일
   backgroundColor?: string;     // 배경색 (Tailwind 클래스 또는 CSS 값)
   textColor?: string;           // 텍스트 색상 (Tailwind 클래스 또는 CSS 값)
+  // 각 텍스트 요소의 위치 (사용자가 GUI로 조정)
+  positions?: {
+    [key: string]: ElementPosition;  // 예: { "title": { x: 10, y: 20 }, "subtitle": { x: 0, y: 50 } }
+  };
 }
 
 // 각 템플릿의 Props 타입 정의
@@ -39,7 +51,7 @@ export interface TwoColumnProps extends SlideStyleConfig {
 export interface BulletPointsProps extends SlideStyleConfig {
   title: string;
   points: string[];
-  icon: "check" | "arrow" | "star";
+  icon: "check" | "chevron" | "circle";
 }
 
 export interface QuoteSlideProps extends SlideStyleConfig {

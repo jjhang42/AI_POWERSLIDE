@@ -4,7 +4,7 @@
  */
 
 import { SlideWithProps } from "@/lib/types/slides";
-import { TemplateType } from "@/components/TemplatesSidebar";
+import { TEMPLATE_REGISTRY, TemplateType } from "@/components/templates";
 
 const STORAGE_KEY = "presentation-slides";
 
@@ -211,57 +211,7 @@ export const AIHelpers = {
    * 유틸리티: 슬라이드 타입별 기본 props 생성
    */
   getDefaultProps: (type: TemplateType): any => {
-    const defaults: Record<TemplateType, any> = {
-      TitleSlide: {
-        title: "New Presentation",
-        subtitle: "Subtitle here",
-        author: "Your Name",
-        date: new Date().toLocaleDateString(),
-      },
-      SectionTitle: {
-        section: "Section 1",
-        title: "Section Title",
-        description: "Section description",
-      },
-      ContentSlide: {
-        title: "Content Title",
-        content: "Content goes here...",
-        align: "left",
-      },
-      TwoColumn: {
-        title: "Two Column Layout",
-        left: "Left column content",
-        right: "Right column content",
-        split: "50-50",
-      },
-      BulletPoints: {
-        title: "Key Points",
-        points: ["Point 1", "Point 2", "Point 3"],
-        icon: "chevron",
-      },
-      QuoteSlide: {
-        quote: "Your quote here",
-        author: "Author Name",
-        title: "Title/Position",
-      },
-      ImageWithCaption: {
-        title: "Image Title",
-        imageSrc: "https://via.placeholder.com/800x600",
-        imageAlt: "Placeholder image",
-        caption: "Image caption",
-        layout: "contained",
-      },
-      ThankYou: {
-        message: "Thank You",
-        cta: "Questions?",
-        contact: {
-          email: "contact@example.com",
-          website: "www.example.com",
-        },
-      },
-    };
-
-    return defaults[type] || {};
+    return TEMPLATE_REGISTRY[type]?.defaultProps || {};
   },
 };
 

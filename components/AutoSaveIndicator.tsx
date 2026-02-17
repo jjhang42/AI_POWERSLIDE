@@ -8,12 +8,14 @@ interface AutoSaveIndicatorProps {
   lastSaved?: Date;
   isSaving?: boolean;
   error?: string;
+  compact?: boolean;
 }
 
 export function AutoSaveIndicator({
   lastSaved,
   isSaving = false,
   error,
+  compact = false,
 }: AutoSaveIndicatorProps) {
   const [show, setShow] = useState(false);
 
@@ -34,23 +36,32 @@ export function AutoSaveIndicator({
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -10 }}
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.8 }}
         transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
         className="flex items-center gap-2 text-sm font-medium"
+        title={
+          isSaving
+            ? "Saving..."
+            : error
+            ? "Error saving"
+            : lastSaved
+            ? `Saved at ${lastSaved.toLocaleTimeString()}`
+            : undefined
+        }
       >
         {isSaving && (
           <>
             <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-            <span className="text-muted-foreground">Saving...</span>
+            {!compact && <span className="text-muted-foreground">Saving...</span>}
           </>
         )}
 
         {error && (
           <>
             <AlertCircle className="w-4 h-4 text-red-500" />
-            <span className="text-red-500">Error saving</span>
+            {!compact && <span className="text-red-500">Error</span>}
           </>
         )}
 
@@ -63,7 +74,7 @@ export function AutoSaveIndicator({
             >
               <Cloud className="w-4 h-4 text-green-600 dark:text-green-400" />
             </motion.div>
-            <span className="text-green-600 dark:text-green-400">Saved</span>
+            {!compact && <span className="text-green-600 dark:text-green-400">Saved</span>}
           </>
         )}
       </motion.div>

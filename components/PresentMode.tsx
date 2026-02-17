@@ -188,7 +188,7 @@ export function PresentMode({
                   onClick={prevSlide}
                   disabled={currentIndex === 0}
                   size="sm"
-                  variant="secondary"
+                  variant="accent"
                   className="rounded-full"
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -197,7 +197,7 @@ export function PresentMode({
                 <Button
                   onClick={() => setIsPaused(!isPaused)}
                   size="sm"
-                  variant="secondary"
+                  variant="accent"
                   className="rounded-full"
                 >
                   {isPaused ? (
@@ -211,7 +211,7 @@ export function PresentMode({
                   onClick={nextSlide}
                   disabled={currentIndex === slides.length - 1}
                   size="sm"
-                  variant="secondary"
+                  variant="accent"
                   className="rounded-full"
                 >
                   <ChevronRight className="w-4 h-4" />
@@ -222,7 +222,7 @@ export function PresentMode({
                 <Button
                   onClick={onClose}
                   size="sm"
-                  variant="secondary"
+                  variant="accent"
                   className="rounded-full"
                 >
                   <X className="w-4 h-4 mr-2" />

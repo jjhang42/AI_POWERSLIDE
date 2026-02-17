@@ -10,6 +10,8 @@ export type TransitionType = "fade" | "slide" | "scale" | "cube" | "none";
 interface SlideTransitionsProps {
   currentTransition: TransitionType;
   onTransitionChange: (transition: TransitionType) => void;
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 const TRANSITIONS: { type: TransitionType; name: string; description: string }[] = [
@@ -20,22 +22,14 @@ const TRANSITIONS: { type: TransitionType; name: string; description: string }[]
   { type: "cube", name: "Cube", description: "3D rotation" },
 ];
 
-export function SlideTransitions({ currentTransition, onTransitionChange }: SlideTransitionsProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
+export function SlideTransitions({
+  currentTransition,
+  onTransitionChange,
+  isOpen,
+  onOpenChange,
+}: SlideTransitionsProps) {
   return (
     <>
-      {/* Toggle Button */}
-      <Button
-        variant={currentTransition !== "none" ? "default" : "ghost"}
-        size="sm"
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 left-20 z-40 rounded-full"
-        title="Slide Transitions"
-      >
-        <Wand2 className="w-4 h-4" />
-      </Button>
-
       {/* Modal */}
       <AnimatePresence>
         {isOpen && (
@@ -45,7 +39,7 @@ export function SlideTransitions({ currentTransition, onTransitionChange }: Slid
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setIsOpen(false)}
+              onClick={() => onOpenChange(false)}
               className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
             />
 
@@ -63,7 +57,7 @@ export function SlideTransitions({ currentTransition, onTransitionChange }: Slid
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold">Slide Transitions</h2>
-                <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)}>
+                <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
                   <X className="w-5 h-5" />
                 </Button>
               </div>
@@ -77,7 +71,7 @@ export function SlideTransitions({ currentTransition, onTransitionChange }: Slid
                     transition={{ delay: index * 0.05 }}
                     onClick={() => {
                       onTransitionChange(transition.type);
-                      setIsOpen(false);
+                      onOpenChange(false);
                     }}
                     className={`
                       w-full text-left py-3 px-4 rounded-lg transition-all

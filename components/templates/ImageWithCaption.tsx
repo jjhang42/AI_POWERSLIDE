@@ -6,6 +6,7 @@
 import Image from "next/image";
 import { EditableText } from "@/components/editor/EditableText";
 import { ImageWithCaptionProps } from "@/lib/types/slides";
+import { useDraggableWrapper, WithDraggableProps } from "@/components/positioning/withDraggableElements";
 
 export function ImageWithCaption({
   title,
@@ -17,21 +18,45 @@ export function ImageWithCaption({
   style,
   backgroundColor = "",
   textColor = "",
-  onUpdate
-}: ImageWithCaptionProps & {
+  positions = {},
+  onUpdate,
+  isPositioningEnabled = false,
+  selectedElementId = null,
+  onSelectElement,
+}: ImageWithCaptionProps & WithDraggableProps & {
   onUpdate?: (newProps: Partial<ImageWithCaptionProps>) => void;
 }) {
+  // Draggable wrappers
+  const titleDraggable = useDraggableWrapper(
+    'title',
+    positions,
+    onUpdate,
+    isPositioningEnabled,
+    selectedElementId,
+    onSelectElement
+  );
+
+  const captionDraggable = useDraggableWrapper(
+    'caption',
+    positions,
+    onUpdate,
+    isPositioningEnabled,
+    selectedElementId,
+    onSelectElement
+  );
+
   return (
     <div
       className={`w-full h-full flex flex-col ${backgroundColor} ${className} p-16`}
       style={style}
     >
       {/* Title */}
-      {title && (
+      {title && titleDraggable.wrapWithDraggable(
         <EditableText
           value={title}
           onChange={(newTitle) => onUpdate?.({ title: newTitle })}
           className={`text-5xl font-bold tracking-tight mb-8 ${textColor}`}
+          disabled={isPositioningEnabled}
         />
       )}
 
@@ -47,11 +72,12 @@ export function ImageWithCaption({
         </div>
 
         {/* Caption */}
-        {caption && (
+        {caption && captionDraggable.wrapWithDraggable(
           <EditableText
             value={caption}
             onChange={(newCaption) => onUpdate?.({ caption: newCaption })}
             className={`text-xl ${textColor || 'text-muted-foreground'} text-center mt-6 max-w-3xl`}
+            disabled={isPositioningEnabled}
           />
         )}
       </div>

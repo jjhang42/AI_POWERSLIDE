@@ -4,6 +4,27 @@
 
 ---
 
+## ⚠️ AI 수정 제한 영역
+
+**다음 파일들은 AI가 수정할 수 없습니다:**
+
+- `/components/positioning/` - 사용자 위치 조정 시스템
+  - `DraggableElement.tsx` - 드래그 가능한 요소
+  - `PositionManager.tsx` - 위치 관리 UI
+
+**AI는 다음을 할 수 있습니다:**
+- ✅ Position props 값 설정 (`positions: { title: { x: 10, y: 20 } }`)
+- ✅ Position 시스템 사용 (슬라이드에 position 데이터 추가)
+
+**AI는 다음을 할 수 없습니다:**
+- ❌ Positioning 시스템 코드 수정
+- ❌ DraggableElement 컴포넌트 수정
+- ❌ PositionManager 컴포넌트 수정
+
+**이유:** 사용자가 GUI에서 직접 요소를 배치하는 기능이므로, AI가 시스템 코드를 수정하면 사용자 경험을 해칠 수 있습니다.
+
+---
+
 ## 개요
 
 **Presentation Builder**는 웹 기반 프레젠테이션 제작 도구입니다.

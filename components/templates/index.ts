@@ -11,3 +11,6 @@ export { BulletPoints } from "./BulletPoints";
 export { QuoteSlide } from "./QuoteSlide";
 export { ImageWithCaption } from "./ImageWithCaption";
 export { ThankYou } from "./ThankYou";
+
+// Registry & Types
+export * from "./registry";

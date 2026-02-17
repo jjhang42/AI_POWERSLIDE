@@ -1,17 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Grid3x3, Eye, EyeOff } from "lucide-react";
-
 interface GridGuidesProps {
   aspectRatio: "16:9" | "4:3" | "16:10";
 }
 
 export function GridGuides({ aspectRatio }: GridGuidesProps) {
-  const [showGrid, setShowGrid] = useState(false);
-  const [showGuides, setShowGuides] = useState(false);
-
   const dimensions = {
     "16:9": { width: 1920, height: 1080 },
     "4:3": { width: 1920, height: 1440 },
@@ -19,49 +12,11 @@ export function GridGuides({ aspectRatio }: GridGuidesProps) {
   };
 
   const { width, height } = dimensions[aspectRatio];
-
-  if (!showGrid && !showGuides) {
-    return (
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => {
-          setShowGrid(true);
-          setShowGuides(true);
-        }}
-        className="fixed bottom-6 left-[152px] z-40 rounded-full"
-        title="Show Grid & Guides"
-      >
-        <Grid3x3 className="w-4 h-4" />
-      </Button>
-    );
-  }
+  const showGrid = true;
+  const showGuides = true;
 
   return (
     <>
-      {/* Toggle Button */}
-      <Button
-        variant="default"
-        size="sm"
-        onClick={() => {
-          if (showGrid && showGuides) {
-            setShowGrid(false);
-            setShowGuides(false);
-          } else {
-            setShowGrid(true);
-            setShowGuides(true);
-          }
-        }}
-        className="fixed bottom-6 left-[152px] z-40 rounded-full"
-        title="Hide Grid & Guides"
-      >
-        {showGrid && showGuides ? (
-          <EyeOff className="w-4 h-4" />
-        ) : (
-          <Eye className="w-4 h-4" />
-        )}
-      </Button>
-
       {/* Grid & Guides Overlay */}
       <div className="fixed inset-0 pointer-events-none z-[45] flex items-center justify-center">
         <svg

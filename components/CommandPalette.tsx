@@ -21,7 +21,7 @@ import {
   ZoomOut,
   Keyboard,
 } from "lucide-react";
-import { TemplateType } from "@/components/TemplatesSidebar";
+import { TemplateType, TEMPLATE_REGISTRY } from "@/components/templates";
 
 interface CommandPaletteProps {
   open: boolean;
@@ -37,17 +37,6 @@ interface CommandPaletteProps {
   slides: any[];
   onGoToSlide: (index: number) => void;
 }
-
-const TEMPLATE_ICONS: Record<TemplateType, any> = {
-  TitleSlide: Heading1,
-  SectionTitle: Square,
-  ContentSlide: FileText,
-  TwoColumn: Columns2,
-  BulletPoints: List,
-  QuoteSlide: Quote,
-  ImageWithCaption: ImageIcon,
-  ThankYou: Smile,
-};
 
 export function CommandPalette({
   open,
@@ -304,7 +293,7 @@ export function CommandPalette({
                 {slides.length > 0 && (
                   <Command.Group heading="Go to Slide" className="px-2 py-2">
                     {slides.map((slide, index) => {
-                      const Icon = TEMPLATE_ICONS[slide.type as TemplateType];
+                      const Icon = TEMPLATE_REGISTRY[slide.type as TemplateType]?.icon;
                       return (
                         <CommandItem
                           key={slide.id}

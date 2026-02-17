@@ -40,15 +40,17 @@ export function KeyboardShortcutsHelp({ isOpen: controlledIsOpen, onOpenChange }
 
   return (
     <>
-      {/* Toggle Button */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 left-6 z-40 rounded-full"
-      >
-        <Keyboard className="w-4 h-4" />
-      </Button>
+      {/* Toggle Button - Only show if not controlled */}
+      {controlledIsOpen === undefined && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsOpen(true)}
+          className="fixed bottom-6 left-6 z-40 rounded-full"
+        >
+          <Keyboard className="w-4 h-4" />
+        </Button>
+      )}
 
       {/* Modal */}
       <AnimatePresence>

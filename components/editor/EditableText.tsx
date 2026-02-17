@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Pencil } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useEdit } from "@/lib/contexts/EditContext";
 
 interface EditableTextProps {
   value: string;
@@ -12,6 +13,7 @@ interface EditableTextProps {
   className?: string;
   multiline?: boolean;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 export function EditableText({
@@ -21,7 +23,9 @@ export function EditableText({
   className,
   multiline = false,
   placeholder = "Click to edit",
+  disabled = false,
 }: EditableTextProps) {
+  const { isEditMode } = useEdit();
   const [isEditing, setIsEditing] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [localValue, setLocalValue] = useState(value);
@@ -40,7 +44,9 @@ export function EditableText({
   }, [isEditing]);
 
   const handleClick = () => {
-    setIsEditing(true);
+    if (!disabled && isEditMode) {
+      setIsEditing(true);
+    }
   };
 
   const handleBlur = () => {
@@ -75,30 +81,35 @@ export function EditableText({
     return (
       <motion.div
         onClick={handleClick}
-        onMouseEnter={() => setIsHovered(true)}
+        onMouseEnter={() => isEditMode && setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         className={cn(
-          "relative cursor-text rounded-md transition-all duration-150",
-          "hover:bg-black/[0.02] dark:hover:bg-white/[0.02]",
-          "hover:backdrop-blur-sm",
+          "relative rounded-md transition-all duration-200",
+          isEditMode && [
+            "cursor-text",
+            "hover:bg-blue-50/50 dark:hover:bg-blue-950/20",
+            "hover:ring-1 hover:ring-blue-200 dark:hover:ring-blue-800",
+            "hover:shadow-sm hover:shadow-blue-100 dark:hover:shadow-blue-900/30",
+          ],
+          !isEditMode && "cursor-default",
           className
         )}
-        whileHover={{ scale: 1.005 }}
+        whileHover={isEditMode ? { scale: 1.005 } : {}}
         transition={{ type: "tween", ease: [0.25, 0.1, 0.25, 1], duration: 0.15 }}
       >
         {value || <span className="text-muted-foreground">{placeholder}</span>}
 
-        {/* Subtle edit icon on hover */}
+        {/* Subtle edit icon on hover - only in edit mode */}
         <AnimatePresence>
-          {isHovered && !isEditing && (
+          {isEditMode && isHovered && !isEditing && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 0.15 }}
-              className="absolute -right-2 -top-2 p-1 bg-background rounded-full shadow-sm border border-border"
+              initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
+              animate={{ opacity: 1, scale: 1, rotate: 0 }}
+              exit={{ opacity: 0, scale: 0.8, rotate: 10 }}
+              transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+              className="absolute -right-3 -top-3 p-1.5 bg-blue-500 text-white rounded-full shadow-lg shadow-blue-500/30 border border-blue-400"
             >
-              <Pencil className="w-3 h-3 text-muted-foreground" />
+              <Pencil className="w-3 h-3" />
             </motion.div>
           )}
         </AnimatePresence>
@@ -107,13 +118,13 @@ export function EditableText({
         <AnimatePresence>
           {showSavedFeedback && (
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
+              initial={{ opacity: 0, y: -10, scale: 0.5 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.5 }}
               transition={{ duration: 0.2 }}
-              className="absolute -right-8 top-0 text-xs text-green-600 dark:text-green-400 font-medium"
+              className="absolute -right-8 top-0 px-2 py-0.5 bg-green-500 text-white text-xs font-medium rounded-full shadow-lg"
             >
-              ✓
+              ✓ Saved
             </motion.div>
           )}
         </AnimatePresence>

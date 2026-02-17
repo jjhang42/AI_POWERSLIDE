@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { BulletPointsProps } from "@/lib/types/slides";
+import { useDraggableWrapper, WithDraggableProps } from "@/components/positioning/withDraggableElements";
 
 export function BulletPoints({
   title,
@@ -18,16 +19,30 @@ export function BulletPoints({
   style,
   backgroundColor = "",
   textColor = "",
-  onUpdate
-}: BulletPointsProps & {
+  positions = {},
+  onUpdate,
+  isPositioningEnabled = false,
+  selectedElementId = null,
+  onSelectElement,
+}: BulletPointsProps & WithDraggableProps & {
   onUpdate?: (newProps: Partial<BulletPointsProps>) => void;
 }) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const Icon = {
+  const Icon = ({
     check: Check,
     chevron: ChevronRight,
     circle: Circle,
-  }[icon];
+  }[icon] || ChevronRight);
+
+  // Draggable wrapper for title
+  const titleDraggable = useDraggableWrapper(
+    'title',
+    positions,
+    onUpdate,
+    isPositioningEnabled,
+    selectedElementId,
+    onSelectElement
+  );
 
   const handleItemChange = (index: number, newValue: string) => {
     const newPoints = [...points];
@@ -50,39 +65,59 @@ export function BulletPoints({
       style={style}
     >
       {/* Title */}
-      <EditableText
-        value={title}
-        onChange={(newTitle) => onUpdate?.({ title: newTitle })}
-        className={`text-5xl font-bold tracking-tight mb-12 ${textColor}`}
-      />
+      {titleDraggable.wrapWithDraggable(
+        <EditableText
+          value={title}
+          onChange={(newTitle) => onUpdate?.({ title: newTitle })}
+          className={`text-5xl font-bold tracking-tight mb-12 ${textColor}`}
+          disabled={isPositioningEnabled}
+        />
+      )}
 
       {/* Bullet Points */}
       <div className="space-y-6 flex-1">
-        {points.map((point, index) => (
-          <div
-            key={index}
-            className="flex items-start gap-4 group"
-            onMouseEnter={() => setHoveredIndex(index)}
-            onMouseLeave={() => setHoveredIndex(null)}
-          >
-            <Icon className={`w-8 h-8 ${textColor || 'text-primary'} flex-shrink-0 mt-1`} />
-            <EditableText
-              value={point}
-              onChange={(newValue) => handleItemChange(index, newValue)}
-              className={`text-2xl ${textColor || 'text-foreground'} leading-relaxed flex-1`}
-            />
-            {hoveredIndex === index && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleDeleteItem(index)}
-                className="transition-opacity h-8 w-8 p-0"
-              >
-                <Trash2 className="w-4 h-4 text-destructive" />
-              </Button>
-            )}
-          </div>
-        ))}
+        {points.map((point, index) => {
+          const pointId = `point_${index}`;
+          const pointDraggable = useDraggableWrapper(
+            pointId,
+            positions,
+            onUpdate,
+            isPositioningEnabled,
+            selectedElementId,
+            onSelectElement
+          );
+
+          return (
+            <div
+              key={index}
+              className="flex items-start gap-4 group"
+              onMouseEnter={() => setHoveredIndex(index)}
+              onMouseLeave={() => setHoveredIndex(null)}
+            >
+              {pointDraggable.wrapWithDraggable(
+                <div className="flex items-start gap-4 flex-1">
+                  <Icon className={`w-8 h-8 ${textColor || 'text-primary'} flex-shrink-0 mt-1`} />
+                  <EditableText
+                    value={point}
+                    onChange={(newValue) => handleItemChange(index, newValue)}
+                    className={`text-2xl ${textColor || 'text-foreground'} leading-relaxed flex-1`}
+                    disabled={isPositioningEnabled}
+                  />
+                </div>
+              )}
+              {hoveredIndex === index && !isPositioningEnabled && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDeleteItem(index)}
+                  className="transition-opacity h-8 w-8 p-0"
+                >
+                  <Trash2 className="w-4 h-4 text-destructive" />
+                </Button>
+              )}
+            </div>
+          );
+        })}
 
         <Button
           variant="outline"

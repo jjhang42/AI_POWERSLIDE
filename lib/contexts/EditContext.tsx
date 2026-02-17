@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, ReactNode } from "react";
 
 interface EditContextValue {
   isEditMode: boolean;
@@ -10,13 +10,11 @@ interface EditContextValue {
 const EditContext = createContext<EditContextValue | undefined>(undefined);
 
 export function EditProvider({ children }: { children: ReactNode }) {
-  const [isEditMode, setIsEditMode] = useState(false);
-
   return (
     <EditContext.Provider
       value={{
-        isEditMode,
-        toggleEditMode: () => setIsEditMode(!isEditMode),
+        isEditMode: true,
+        toggleEditMode: () => {},
       }}
     >
       {children}

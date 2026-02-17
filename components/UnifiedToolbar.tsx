@@ -6,8 +6,6 @@ import {
   Undo2,
   Redo2,
   History,
-  Eye,
-  Pencil,
   Move,
   Grid3x3,
   Wand2,
@@ -100,7 +98,7 @@ export function UnifiedToolbar({
   onExport,
   isExporting,
 }: UnifiedToolbarProps) {
-  const { isEditMode, toggleEditMode } = useEdit();
+  useEdit(); // EditContext 연결 유지
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
@@ -109,24 +107,12 @@ export function UnifiedToolbar({
 
   return (
     <>
-      {/* Edit Mode Indicator Bar */}
-      {isEditMode && (
-        <motion.div
-          initial={{ scaleX: 0, opacity: 0 }}
-          animate={{ scaleX: 1, opacity: 1 }}
-          exit={{ scaleX: 0, opacity: 0 }}
-          transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-          className="fixed top-0 left-[220px] right-0 h-1 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-500 z-[60]"
-          style={{ transformOrigin: "left" }}
-        />
-      )}
-
       {/* Main Toolbar - Full Width */}
       <motion.div
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-        className={`fixed ${isEditMode ? 'top-1' : 'top-0'} left-[220px] right-0 z-50`}
+        className="fixed top-0 left-[220px] right-0 z-50"
       >
         <div className="flex items-center justify-between h-14 px-6 bg-background/80 backdrop-blur-2xl border-b border-border/50 shadow-xl">
           {/* Left Group - Edit History & View Controls */}
@@ -194,22 +180,18 @@ export function UnifiedToolbar({
               <History className="w-4 h-4" />
             </Button>
 
-            {/* Position Manager (Edit Mode Only) */}
-            {isEditMode && (
-              <>
-                <div className="w-px h-6 bg-border mx-2" />
-                <Button
-                  variant={isPositioningEnabled ? "default" : "ghost"}
-                  size="sm"
-                  onClick={onTogglePositioning}
-                  className="h-8 px-3 rounded-md"
-                  title="Position Mode"
-                >
-                  <Move className="w-4 h-4 mr-2" />
-                  <span className="text-sm">Position</span>
-                </Button>
-              </>
-            )}
+            {/* Position Manager */}
+            <div className="w-px h-6 bg-border mx-2" />
+            <Button
+              variant={isPositioningEnabled ? "default" : "ghost"}
+              size="sm"
+              onClick={onTogglePositioning}
+              className="h-8 px-3 rounded-md"
+              title="Position Mode"
+            >
+              <Move className="w-4 h-4 mr-2" />
+              <span className="text-sm">Position</span>
+            </Button>
 
             {/* View Controls */}
             <div className="w-px h-6 bg-border mx-2" />
@@ -312,31 +294,6 @@ export function UnifiedToolbar({
               compact
             />
 
-            <div className="w-px h-6 bg-border" />
-
-            {/* Edit Mode Toggle */}
-            <Button
-              variant={isEditMode ? "default" : "ghost"}
-              size="sm"
-              onClick={toggleEditMode}
-              className={`h-8 px-4 rounded-md ${
-                isEditMode
-                  ? "bg-blue-500 hover:bg-blue-600 text-white"
-                  : ""
-              }`}
-            >
-              {isEditMode ? (
-                <>
-                  <Eye className="w-4 h-4 mr-2" />
-                  <span className="text-sm font-medium">Preview</span>
-                </>
-              ) : (
-                <>
-                  <Pencil className="w-4 h-4 mr-2" />
-                  <span className="text-sm font-medium">Edit</span>
-                </>
-              )}
-            </Button>
           </div>
         </div>
       </motion.div>

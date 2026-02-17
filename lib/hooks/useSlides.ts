@@ -61,22 +61,27 @@ export function useSlides() {
 
   // 변경 시 저장 (debounced)
   useEffect(() => {
-    if (isLoaded && slides.length > 0) {
-      setIsSaving(true);
+    if (!isLoaded) return;
 
-      const timer = setTimeout(() => {
-        try {
+    setIsSaving(true);
+
+    const timer = setTimeout(() => {
+      try {
+        if (slides.length === 0) {
+          // 슬라이드가 없으면 localStorage에서 제거
+          localStorage.removeItem(STORAGE_KEY);
+        } else {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(slides));
-          setLastSaved(new Date());
-          setIsSaving(false);
-        } catch (e) {
-          console.error("Failed to save slides:", e);
-          setIsSaving(false);
         }
-      }, 300); // 300ms debounce
+        setLastSaved(new Date());
+        setIsSaving(false);
+      } catch (e) {
+        console.error("Failed to save slides:", e);
+        setIsSaving(false);
+      }
+    }, 300); // 300ms debounce
 
-      return () => clearTimeout(timer);
-    }
+    return () => clearTimeout(timer);
   }, [slides, isLoaded]);
 
   // 슬라이드 추가
